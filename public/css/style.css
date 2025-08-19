@@ -1,0 +1,107 @@
+a {
+    color: inherit;
+}
+
+@media (min-width: 992px) {
+    .nav-center-lg {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .navbar {
+        height: 7vh;
+    }
+}
+
+.hero {
+    height: 90vh;
+    background: linear-gradient(0deg, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0.5)), url('/img/mj.jpg') center center no-repeat;
+    background-size: cover;
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.c-red {
+    color: rgb(177, 8, 8);
+}
+
+.btn-red {
+    background-color: rgb(177, 8, 8);
+    color: white;
+}
+
+.btn-red:hover {
+    background-color: rgb(117, 8, 8);
+    color: white;
+}
+
+.w-fit {
+    width: fit-content;
+}
+
+/* Accordion Filtri */
+.accordion-button:not(.collapsed) {
+    color: #000;
+    background-color: #cecece;
+}
+
+.form-check-input:checked {
+    background-color: rgb(177, 8, 8);
+    border-color: rgb(177, 8, 8);
+}
+
+
+/* Card Maglia */
+.foto-maglia,
+.nome-maglia,
+.prezzo-maglia,
+.sold-out-overlay {
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.card:hover .foto-maglia {
+    transform: translateY(15px);
+}
+
+
+.card:hover .nome-maglia {
+    transform: translateY(10px);
+}
+
+.card .prezzo-maglia {
+    height: 1.5em;
+    line-height: 1.5em;
+}
+
+.card:hover .prezzo-maglia {
+    opacity: 0;
+}
+
+/* Bottone Taglia Maglia */
+.btn-check+.btn-outline-dark:hover {
+    background-color: #d3d3d3;
+}
+
+.btn-check:checked+.btn-outline-dark:hover {
+    background-color: #555555;
+}
+
+.sold-out-overlay {
+    position: absolute;
+    left: 1rem;
+    width: 25%;
+    height: 25%;
+    background: url('/img/soldout.png') no-repeat center center;
+    background-size: auto;
+    background-size: contain;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 100%;
+}
