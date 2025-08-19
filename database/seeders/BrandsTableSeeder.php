@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Brand;  // o App\Models\Marca se usi italiano
+use App\Models\Brand;
 
 class BrandsTableSeeder extends Seeder
 {

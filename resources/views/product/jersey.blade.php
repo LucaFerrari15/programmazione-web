@@ -24,7 +24,7 @@
 
     <div class="row mt-4">
         <div class="col offset-1">
-            <a class="btn btn-red" href="{{ route('product.products') }}"><i class="bi bi-box-arrow-left"></i> Torna
+            <a class="btn btn-red" href="{{ route('product.products') }}"><i class="bi bi-arrow-left"></i> Torna
                 Indietro</a>
         </div>
     </div>

@@ -4,6 +4,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -25,11 +26,14 @@ Route::post('/faq/send', [ContactController::class, 'send'])->name('contact.send
 Route::get('/faq', [FrontController::class, 'getFaq'])->name('faq');
 
 Route::middleware(['auth', 'isRegisteredUser'])->group(function () {
-    Route::get('/payment', [FrontController::class, 'getPayment'])->name('payment');
+
 
     Route::resource('cart', CartController::class);
     Route::post('/cart/store', [CartController::class, 'store'])->name('cart.store');
     Route::delete('/card/{id}', [CartController::class, 'destroy'])->name('card.deleteItem');
+
+    Route::get('/payment', [OrderController::class, 'index'])->name('payment');
+    Route::post('/payment/checkout', [OrderController::class, 'store'])->name('orders.checkout');
 
 });
 

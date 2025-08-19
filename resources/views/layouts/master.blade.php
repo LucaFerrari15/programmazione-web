@@ -6,6 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
+    <link rel="icon" href="{{url('/')}}/img/favicon.ico" type="image/x-icon">
+
     <!-- Fogli di stile -->
     <link rel="stylesheet" href="{{ url('/') }}/css/bootstrap.min.css">
     <link href="{{ url('/') }}/css/style.css" rel="stylesheet">
@@ -33,6 +35,16 @@
             });
         });
     </script>
+
+    @if(session('open_cart_offcanvas'))
+        <script>
+            $(document).ready(function () {
+                var cartOffcanvasEl = $('#offcanvasCarrello')[0];
+                var cartOffcanvas = new bootstrap.Offcanvas(cartOffcanvasEl);
+                cartOffcanvas.show();
+            });
+        </script>
+    @endif
 
 
 
@@ -69,7 +81,6 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-box-seam"></i> I miei ordini</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-heart"></i> I miei preferiti</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -140,6 +151,8 @@
             </div>
         </div>
 
+
+
         <!-- Offcanvas carrello -->
         <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCarrello" aria-labelledby="offcanvasRightLabel">
             <div class="offcanvas-header">
@@ -192,7 +205,11 @@
                         @endphp
                         Totale: {{number_format($sum, 2)}}€
                     </div>
-                    <a href="{{route('payment')}}" class="btn btn-success"><i class="bi bi-bank"></i> Paga</a>
+                    @if (auth()->user()->cartItems()->sum('quantity') < 1)
+                        <a href="" class="btn btn-success disabled"><i class="bi bi-bank"></i> Paga</a>
+                    @else
+                        <a href="{{route('payment')}}" class="btn btn-success"><i class="bi bi-bank"></i> Paga</a>
+                    @endif
                 </div>
             </div>
         </div>

@@ -35,10 +35,13 @@ class CartController extends Controller
         $dl = new DataLayer();
         $dl->addToCart($productId, $sizeId, auth()->user()->id);
 
-        $redirectTo = $request->input('redirect') ?? url()->previous() ?? '/';
+        // Imposto la sessione per aprire l'offcanvas
+        session()->flash('open_cart_offcanvas', true);
 
+        $redirectTo = $request->input('redirect') ?? url()->previous() ?? '/';
         return redirect()->intended($redirectTo);
     }
+
 
     /**
      * Display the specified resource.
@@ -72,10 +75,12 @@ class CartController extends Controller
         $dl = new DataLayer();
         $dl->removeFromCart($id, auth()->id());
 
-        // Prendo la request usando il helper globale
-        $redirectTo = request()->input('redirect') ?? url()->previous() ?? '/';
+        // Apri comunque l'offcanvas
+        session()->flash('open_cart_offcanvas', true);
 
+        $redirectTo = request()->input('redirect') ?? url()->previous() ?? '/';
         return redirect()->intended($redirectTo);
     }
+
 
 }

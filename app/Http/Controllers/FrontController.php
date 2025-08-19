@@ -16,8 +16,4 @@ class FrontController extends Controller
         return view('faq');
     }
 
-    public function getPayment()
-    {
-        return view('payment');
-    }
 }

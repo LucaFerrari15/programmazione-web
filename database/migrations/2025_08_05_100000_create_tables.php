@@ -39,7 +39,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('product_size', function (Blueprint $table) {
+        Schema::create('product_sizes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('size_id')->constrained()->onDelete('cascade');
@@ -53,9 +53,21 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['pending', 'paid', 'shipped', 'completed', 'cancelled'])->default('pending');
+
+            // Dati di spedizione
+            $table->string('nome_spedizione');
+            $table->string('cognome_spedizione');
+            $table->string('via');
+            $table->string('civico');
+            $table->string('cap', 10);
+            $table->string('comune');
+            $table->string('provincia', 10);
+            $table->string('paese')->default('IT');
+
             $table->decimal('total', 10, 2);
             $table->timestamps();
         });
+
 
 
         Schema::create('order_items', function (Blueprint $table) {

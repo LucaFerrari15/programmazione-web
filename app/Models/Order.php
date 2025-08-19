@@ -9,8 +9,17 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'status',
-        'total',
+        'nome_spedizione',
+        'cognome_spedizione',
+        'via',
+        'civico',
+        'cap',
+        'comune',
+        'provincia',
+        'paese',
+        'total'
     ];
+
 
     public function user()
     {

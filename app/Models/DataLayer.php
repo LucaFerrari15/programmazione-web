@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class DataLayer
 {
@@ -82,7 +83,98 @@ class DataLayer
 
     public function showCart($user_id)
     {
-        $cart = CartItem::where('user_id', $user_id)->orderBy('product_id', 'asc')->get();
+        $cart = CartItem::where('user_id', $user_id)
+            ->with(['product', 'size'])
+            ->orderBy('product_id', 'asc')
+            ->get();
+
         return $cart;
+    }
+
+
+    public function createNewOrder($user_id, $orderData, $total)
+    {
+        return Order::create([
+            'user_id' => $user_id,
+            'status' => 'paid', // simulazione
+            'nome_spedizione' => $orderData['nome_spedizione'],
+            'cognome_spedizione' => $orderData['cognome_spedizione'],
+            'via' => $orderData['via'],
+            'civico' => $orderData['civico'],
+            'cap' => $orderData['cap'],
+            'comune' => $orderData['comune'],
+            'provincia' => $orderData['provincia'],
+            'paese' => $orderData['paese'],
+
+            'total' => $total
+        ]);
+    }
+
+    public function getQuantityProductByIdAndSize($product_id, $size_id)
+    {
+        $productSizeCercato = ProductSize::where('product_id', $product_id)
+            ->where('size_id', $size_id)
+            ->first();
+        return $productSizeCercato ? $productSizeCercato->quantita : 0;
+    }
+
+
+
+
+    public function createOrderItem($order, $item)
+    {
+        OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $item->product_id,
+            'size_id' => $item->size_id,
+            'quantity' => $item->quantity,
+            'price' => $item->product->prezzo,
+        ]);
+    }
+
+    public function decrementaTaglie($item)
+    {
+        ProductSize::where('product_id', $item->product_id)
+            ->where('size_id', $item->size_id)
+            ->decrement('quantita', $item->quantity);
+    }
+
+    public function createOrderFromCart($user_id, $orderData)
+    {
+        $cartItems = $this->showCart($user_id);
+        $total = 0;
+
+        if ($cartItems->sum() == 0) {
+            return null;
+        }
+
+        // Controllo disponibilità
+        foreach ($cartItems as $item) {
+
+            $quantitaDisponibile = $this->getQuantityProductByIdAndSize($item->product->id, $item->size->id);
+
+            if ($quantitaDisponibile < $item->quantity) {
+                return null;
+            }
+
+            $total += $item->product->prezzo * $item->quantity;
+        }
+
+
+        $order = $this->createNewOrder($user_id, $orderData, $total);
+
+
+
+        foreach ($cartItems as $item) {
+            $this->createOrderItem($order, $item);
+
+            $this->decrementaTaglie($item);
+
+        }
+
+
+        CartItem::where('user_id', $user_id)->delete();
+
+        return $order;
     }
 }
