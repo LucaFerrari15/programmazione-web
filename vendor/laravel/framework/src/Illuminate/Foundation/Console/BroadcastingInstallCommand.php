@@ -62,7 +62,7 @@ class BroadcastingInstallCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return int
+     * @return void
      */
     public function handle()
     {
@@ -367,9 +367,7 @@ class BroadcastingInstallCommand extends Command
             return;
         }
 
-        $install = confirm('Would you like to install Laravel Reverb?', default: true);
-
-        if (! $install) {
+        if (! confirm('Would you like to install Laravel Reverb?', default: true)) {
             return;
         }
 

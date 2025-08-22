@@ -1,8 +1,8 @@
 @extends('layouts.master')
 
-@section('title', 'F.A.Q | JerseyShop')
+@section('title', 'Payment | JerseyShop')
 
-@section('active_faq', 'active')
+@section('active_utente', 'active')
 
 @section('contenuto_principale')
     <div class="row mt-4">
@@ -155,12 +155,17 @@
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             @foreach (auth()->user()->cartItems()->get() as $singleItem)
-                                <li class="list-group-item d-flex justify-content-between align-items-top">
-                                    <p>{{$singleItem->product->brand->nome}} -
-                                        {{$singleItem->product->nome}} - {{$singleItem->quantity}} x {{$singleItem->size->nome}}
-                                    </p>
-                                    <p>{{$singleItem->product->prezzo}} €</p>
-                                </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-top">
+                                                        <p>{{$singleItem->product->brand->nome}} -
+                                                            {{$singleItem->product->nome}} - {{$singleItem->quantity}} x {{$singleItem->size->nome}}
+                                                        </p>
+                                                        <p>
+                                                            {{number_format(
+                                    $singleItem->product->prezzo * $singleItem->quantity,
+                                    2
+                                )}} €
+                                                        </p>
+                                                    </li>
                             @endforeach
                         </ul>
                         <div class="d-flex justify-content-between fw-bold">
@@ -177,27 +182,18 @@
                             Pagamento</label>
                     </div>
                 </div>
+                @if ($errors->any())
+                    <div class="alert mt-4 alert-danger text-pre-line">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>
 
-    <!-- Modal Pagamento confermato -->
-    <div class="modal fade " id="successoPagamento" tabindex="-1" aria-labelledby="successoPagamentoLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body align-text-center">
-                    <h4>
-                        <i class="bi bi-check-all"></i> Pagamento avvenuto
-                        con successo!
-                    </h4>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection

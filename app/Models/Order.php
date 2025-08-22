@@ -30,4 +30,21 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function dataDiCreazioneOrdineFormattata()
+    {
+        return $this->created_at->format('d-m-Y');
+    }
+
+    public function quantitaTotale()
+    {
+        $quantitaTotale = 0;
+
+        foreach ($this->items as $orderItem) {
+            $quantitaTotale += $orderItem->quantity;
+        }
+
+        return $quantitaTotale;
+    }
+
 }

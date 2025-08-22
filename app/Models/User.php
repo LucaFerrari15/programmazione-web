@@ -47,14 +47,6 @@ class User extends Authenticatable
         ];
     }
 
-    // Nel modello User
-    public function wishlist()
-    {
-        return $this->belongsToMany(Product::class, 'wishlists')
-            ->withPivot('added_at')
-            ->withTimestamps();
-    }
-
 
     public function orders()
     {

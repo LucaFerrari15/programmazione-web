@@ -17,8 +17,8 @@ class isAdminMiddleware
     {
         if ((!auth()->check()) || (auth()->user()->role != 'admin')) {
             return response()->view(
-                'errors.accessDenied',
-                ['message' => 'Only administrators can access this page!'],
+                'errors.403',
+                [],
                 403
             );
         }

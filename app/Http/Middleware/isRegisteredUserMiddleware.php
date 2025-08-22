@@ -16,7 +16,10 @@ class isRegisteredUserMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if ((!auth()->check()) || (auth()->user()->role != 'registered_user')) {
-            return response()->view('errors.accessDenied', ['message' => 'Only registered users can access this page!'], 403);
+            // Forza l'uso della vista personalizzata senza passare per il sistema di errori di Laravel
+            return response()
+                ->view('errors.403', ['exception' => null], 403)
+                ->header('Content-Type', 'text/html');
         }
         return $next($request);
     }

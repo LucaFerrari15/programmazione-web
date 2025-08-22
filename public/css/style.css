@@ -23,7 +23,17 @@ a {
     text-align: center;
 }
 
-.hero h1 {
+.error-img {
+    height: 90vh;
+    background: linear-gradient(0deg, rgba(0, 0, 0, .5), rgba(0, 0, 0, 0.5)), url('/img/error.jpg') center center no-repeat;
+    background-size: cover;
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero h1,
+.error-img h1 {
     font-size: 3rem;
     font-weight: bold;
 }
@@ -104,4 +114,8 @@ a {
     z-index: 10;
     pointer-events: none;
     opacity: 100%;
+}
+
+.text-pre-line {
+    white-space: pre-line;
 }

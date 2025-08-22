@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DataLayer;
+use App\Exceptions\ProductNotAvailableException;
+use App\Exceptions\CartEmptyException;
 
 class OrderController extends Controller
 {
@@ -12,7 +14,9 @@ class OrderController extends Controller
      */
     public function index()
     {
-        return view('payment');
+        $dl = new DataLayer();
+        $ordersList = $dl->listOrders(auth()->user()->id);
+        return view('orders.orders')->with('order_list', $ordersList);
     }
 
     /**
@@ -61,13 +65,16 @@ class OrderController extends Controller
             'paese'
         ]);
 
-
-        if ($dl->createOrderFromCart(auth()->user()->id, $orderData) == null) {
-            return view('faq');
+        try {
+            $order = $dl->createOrderFromCart(auth()->user()->id, $orderData);
+        } catch (ProductNotAvailableException $e) {
+            return back()->withErrors(['cart_error' => $e->getMessage()]);
+        } catch (CartEmptyException $e) {
+            return back()->withErrors(["Il carrello è vuoto!"]);
         }
 
 
-        return view('index');
+        return view('orders.detailOrder')->with('order', $order)->with('message_success', "Acquisto avvenuto con successo");
     }
 
     /**
@@ -76,6 +83,14 @@ class OrderController extends Controller
     public function show(string $id)
     {
 
+        $dl = new DataLayer();
+        $order = $dl->findOrderByIdAndUser($id, auth()->user()->id);
+
+        if ($order != null) {
+            return view('orders.detailOrder')->with('order', $order);
+        } else {
+            return view('errors.wrongID')->with('message', "Oooops, something went wrong!");
+        }
     }
 
     /**

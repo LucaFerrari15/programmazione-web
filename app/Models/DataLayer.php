@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Exception;
+use App\Exceptions\ProductNotAvailableException;
+use App\Exceptions\CartEmptyException;
+use App\Exceptions\CartItemNotFoundException;
 
 class DataLayer
 {
@@ -70,7 +72,7 @@ class DataLayer
             ->first();
 
         if (!$cartItem) {
-            return; // TODO
+            throw new CartItemNotFoundException("L'articolo selezionato non esiste nel carrello.");
         }
 
         if ($cartItem->quantity > 1) {
@@ -144,8 +146,8 @@ class DataLayer
         $cartItems = $this->showCart($user_id);
         $total = 0;
 
-        if ($cartItems->sum() == 0) {
-            return null;
+        if ($cartItems->count() == 0) {
+            throw new CartEmptyException();
         }
 
         // Controllo disponibilità
@@ -154,8 +156,27 @@ class DataLayer
             $quantitaDisponibile = $this->getQuantityProductByIdAndSize($item->product->id, $item->size->id);
 
             if ($quantitaDisponibile < $item->quantity) {
-                return null;
+                CartItem::where('user_id', $user_id)
+                    ->where('id', $item->id)
+                    ->decrement('quantity', $item->quantity - $quantitaDisponibile);
+
+
+                $prodottiNonDisponibili[] = "{$item->product->nome}";
             }
+
+
+
+
+        }
+
+        if (!empty($prodottiNonDisponibili)) {
+            $messaggio = "Alcuni prodotti non sono disponibili nelle quantità richieste e sono stati rimossi gli elementi in eccesso dal carrello:\n- "
+                . implode("\n- ", $prodottiNonDisponibili);
+
+            throw new ProductNotAvailableException($messaggio);
+        }
+
+        foreach ($cartItems as $item) {
 
             $total += $item->product->prezzo * $item->quantity;
         }
@@ -175,6 +196,18 @@ class DataLayer
 
         CartItem::where('user_id', $user_id)->delete();
 
+        return $order;
+    }
+
+    public function listOrders($user_id)
+    {
+        $listOrder = Order::where('user_id', $user_id)->get();
+        return $listOrder;
+    }
+
+    public function findOrderByIdAndUser($id, $user_id)
+    {
+        $order = Order::where('id', $id)->where('user_id', $user_id)->first();
         return $order;
     }
 }

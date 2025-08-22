@@ -14,7 +14,7 @@
 
     <!-- jQuery e plugin JavaScript  -->
     <script src="http://code.jquery.com/jquery.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="{{ url('/') }}/js/bootstrap.min.js"></script>
 
@@ -35,6 +35,9 @@
             });
         });
     </script>
+
+
+
 
     @if(session('open_cart_offcanvas'))
         <script>
@@ -76,11 +79,13 @@
                     @if (auth()->check())
                         <!-- Bottone per aprire il modal logout -->
                         <li class="nav-item dropdown">
-                            <button class="dropdown-toggle nav-link" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="dropdown-toggle nav-link @yield('active_utente')" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                                 <i class="bi bi-person-circle"></i> {{ auth()->user()->name }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-box-seam"></i> I miei ordini</a></li>
+                                <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i> I
+                                        miei ordini</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -92,20 +97,26 @@
                         </li>
                     @else
                         <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="modal" data-bs-target="#login">
+
+                            <a class="nav-link" href="{{ route('login') }}">
                                 <i class="bi bi-person-circle"></i> Login
-                            </button>
+                            </a>
                         </li>
                     @endif
 
                     <li class="nav-item">
                         <div class="position-relative d-inline-block">
-                            <button class="btn btn-outline-light" type="button"
-                                data-bs-toggle="{{ auth()->check() ? 'offcanvas' : 'modal' }}"
-                                data-bs-target="{{ auth()->check() ? '#offcanvasCarrello' : '#login' }}"
-                                aria-controls="offcanvasCarrello">
-                                <i class="bi bi-cart"></i> Carrello
-                            </button>
+                            @if (auth()->check())
+                                <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasCarrello" aria-controls="offcanvasCarrello">
+                                    <i class="bi bi-cart"></i> Carrello
+                                </button>
+                            @else
+                                <a class="btn btn-outline-light" href="{{ route('login') }}"><i class="bi bi-cart"></i>
+                                    Carrello</a>
+                            @endif
+
+
                             @if (auth()->check() && auth()->user()->cartItems()->count() > 0)
                                 <span
                                     class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -191,6 +202,11 @@
 
                         </div>
                     @endforeach
+                    @if ($errors->has('cart_error'))
+                        <div class="alert alert-danger" style="white-space: pre-line;">
+                            {{ $errors->first('cart_error') }}
+                        </div>
+                    @endif
 
                 </div>
             </div>
@@ -247,97 +263,7 @@
                 </div>
             </div>
         </div>
-    @else
-        <!-- Modal per il login -->
-        <div class="modal fade" id="login" tabindex="-1" aria-labelledby="modalLogin" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="modalLogin">Login</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{{ route('login') }}">
-                            @csrf
 
-                            <div class="form-floating">
-                                <input type="email" name="email" class="form-control" id="email" placeholder="Email"
-                                    required autofocus>
-                                <label for="email">E-Mail</label>
-                            </div>
-
-                            <div class="form-floating">
-                                <input type="password" name="password" class="form-control my-2" id="password"
-                                    placeholder="Password" required>
-                                <label for="password">Password</label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-door-open"></i> Accedi
-                            </button>
-                        </form>
-
-                    </div>
-                    <div class="modal-footer">
-                        <p role="button" class="c-red" data-bs-toggle="modal" data-bs-target="#registrazione">
-                            Non sei registrato?
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal per la registrazione -->
-        <div class="modal fade " id="registrazione" tabindex="-1" aria-labelledby="modalRegistrazione" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="modalRegistrazione">
-                            Registrazione
-                        </h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{{ route('register') }}">
-                            @csrf
-                            <div class="form-floating">
-                                <input type="text" name="name" class="form-control" id="nome_registrazione"
-                                    placeholder="Nome" required>
-                                <label for="nome_registrazione">Nome</label>
-                            </div>
-
-                            <div class="form-floating">
-                                <input type="email" name="email" class="form-control" id="email_registrazione"
-                                    placeholder="Email" required>
-                                <label for="email_registrazione">E-Mail</label>
-                            </div>
-
-                            <div class="form-floating">
-                                <input type="password" name="password" class="form-control mt-2" id="password_registrazione"
-                                    placeholder="Password" required>
-                                <label for="password_registrazione">Password</label>
-                            </div>
-
-                            <div class="form-floating">
-                                <input type="password" name="password_confirmation" class="form-control my-2"
-                                    id="conferma_password" placeholder="Conferma Password" required>
-                                <label for="conferma_password">Conferma Password</label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-person-plus-fill"></i> Registrati
-                            </button>
-                        </form>
-
-                    </div>
-                    <div class="modal-footer">
-                        <p role="button" class="c-red" data-bs-toggle="modal" data-bs-target="#login">
-                            Sei registrato?
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
     @endif
 
 

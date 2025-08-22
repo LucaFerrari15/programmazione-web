@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DataLayer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use App\Exceptions\CartItemNotFoundException;
 
 class CartController extends Controller
 {
@@ -13,7 +14,7 @@ class CartController extends Controller
      */
     public function index()
     {
-
+        return view('payment');
     }
 
     /**
@@ -73,7 +74,12 @@ class CartController extends Controller
     public function destroy(string $id)
     {
         $dl = new DataLayer();
-        $dl->removeFromCart($id, auth()->id());
+        try {
+            $dl->removeFromCart($id, auth()->id());
+        } catch (CartItemNotFoundException $e) {
+            session()->flash('open_cart_offcanvas', true);
+            return back()->withErrors(['cart_error' => $e->getMessage()]);
+        }
 
         // Apri comunque l'offcanvas
         session()->flash('open_cart_offcanvas', true);

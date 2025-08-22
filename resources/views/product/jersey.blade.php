@@ -93,15 +93,15 @@
 
 
                                 @else
-                                    <button type="button" class="btn btn-red" data-bs-toggle="modal" data-bs-target="#login">
+                                    <a href="{{ route('login') }}" class="btn btn-red">
                                         <i class="bi bi-cart-plus-fill"></i>
                                         Aggiungi al carrello
-                                    </button>
+                                    </a>
                                 @endif
                                 <p class="mt-2">{{ $product->prezzo }} €</p>
                             @else
-                                <button type="button" class="btn btn-red">
-                                    <i class="bi bi-bell-fill"></i> Avvisami quando torna disponibile
+                                <button type="button" class="btn btn-danger" disabled="disabled">
+                                    <i class="bi bi-cart-plus-fill"></i> Aggiungi al carrello
                                 </button>
                             @endif
                         </div>
