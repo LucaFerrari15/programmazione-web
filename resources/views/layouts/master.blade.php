@@ -86,7 +86,7 @@
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i>
                                         {{ auth()->user()->role != 'admin' ? ' I
-                                                    miei ordini' : ' Storico ordini'}} </a></li>
+                                                                miei ordini' : ' Storico ordini'}} </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -270,6 +270,8 @@
 
     @endif
 
+    <!-- Breadcrumb -->
+    @yield('breadcrumb')
 
 
 

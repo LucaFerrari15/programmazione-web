@@ -55,7 +55,14 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $dl = new DataLayer();
+        $product = $dl->findProductById($id);
+
+        if ($product != null) {
+            return view('product.editJersey')->with('product', $product);
+        } else {
+            return view('errors.wrongID')->with('message', "Oooops, something went wrong!");
+        }
     }
 
     /**

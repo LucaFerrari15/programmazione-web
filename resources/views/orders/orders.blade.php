@@ -4,6 +4,22 @@
 
 @section('active_utente', 'active')
 
+@section('breadcrumb')
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <div class="col-10 offset-1">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                        <li class="breadcrumb-item active">{{ auth()->user()->name }}</li>
+                        <li class="breadcrumb-item active" aria-current="page">Ordini</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+@endsection
+
 @section('contenuto_principale')
     <script>
         $(document).ready(function () {
@@ -27,19 +43,60 @@
 
 
 
-            $('#modal_reso').on('show.bs.modal', function (event) {
+            $('#modal_popup_stato').on('show.bs.modal', function (event) {
                 var button = $(event.relatedTarget); // Bottone che apre il modal
                 var orderId = button.data('id');     // Prendi l'id
-                var form = $(this).find('#resoForm');
-                form.attr('action', '/orders/' + orderId + '/reso');
+                var status = button.data('status');  // Prendi lo stato
+                var form = $(this).find('#statoForm');
+                var modalBody = $(this).find('.modal-body');
+                var submitBtn = form.find('button[type="submit"]');
+
+                // Setto l'action dinamicamente
+                form.attr('action', '/orders/' + orderId);
+
+                // Cambia testo e colore in base allo stato
+                switch (status) {
+                    case 'pending':
+                        modalBody.text('Accettare il reso di questo ordine?');
+                        submitBtn
+                            .removeClass()
+                            .addClass('btn btn-red')
+                            .html('<i class="bi bi-cart-x"></i> Accetta');
+                        break;
+
+                    case 'paid':
+                        modalBody.text('Vuoi spedire questo ordine?');
+                        submitBtn
+                            .removeClass()
+                            .addClass('btn btn-primary')
+                            .html('<i class="bi bi-truck"></i> Spedisci');
+                        break;
+
+                    case 'shipped':
+                        modalBody.text('Vuoi segnare questo ordine come completato?');
+                        submitBtn
+                            .removeClass()
+                            .addClass('btn btn-success')
+                            .html('<i class="bi bi-check-circle"></i> Completa');
+                        break;
+
+                    default:
+                        modalBody.text('Sei sicuro di voler fare il reso di questo ordine?');
+                        submitBtn
+                            .removeClass()
+                            .addClass('btn btn-red')
+                            .html('<i class="bi bi-cart-x"></i> Reso');
+                        break;
+                }
             });
+
         });
 
     </script>
 
 
 
-    <div class="my-4">
+    <div class="">
         <div class="row">
             <div class="col-10 offset-1 mt-4">
                 <div role="search">
@@ -82,26 +139,39 @@
                                     <td><a class="btn btn-success" href="{{ route('orders.show', $order->id) }}"><i
                                                 class="bi bi-search"></i> Dettagli</a></td>
                                     <td>
-                                        @if (auth()->user()->role != 'admin')
-                                            @if ($order->status == 'completed')
-                                                <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#modal_reso"
-                                                    data-id="{{ $order->id }}">
-                                                    <i class="bi bi-cart-x"></i> Reso
-                                                </button>
-                                            @else
-                                                <button class="btn btn-danger" disabled><i class="bi bi-cart-x"></i> Reso</button>
-                                            @endif
-                                        @else
-                                            @if ($order->status == 'pending')
-                                                <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#modal_reso"
-                                                    data-id="{{ $order->id }}">
-                                                    <i class="bi bi-cart-x"></i> Accetta reso
-                                                </button>
-                                            @else
-                                                <button class="btn btn-danger" disabled><i class="bi bi-cart-x"></i> Accetta
-                                                    reso</button>
-                                            @endif
-                                        @endif
+                                        @php
+                                            $role = auth()->user()->role;
+                                            $status = $order->status;
+                                            $canReturn = $order->canReturn(); // true/false
+
+                                            if ($role != 'admin') {
+                                                $btn = match($status) {
+                                                    'pending'   => ['danger', 'In attesa reso', 'bi-cart-x', true],
+                                                    'cancelled' => ['secondary', 'Reso completato', 'bi-check2-circle', true],
+                                                    'completed' => ['red', 'Reso', 'bi-cart-x', !$canReturn],
+                                                    default     => ['secondary', 'In attesa', 'bi-fast-forward-fill', true],
+                                                };
+                                                // Se non può fare il reso, override del bottone
+                                                if ($status == 'completed' && !$canReturn) {
+                                                    $btn = ['secondary', 'Operazione completata', 'bi-check2-circle', true];
+                                                }
+                                            } else {
+                                                $btn = match($status) {
+                                                    'pending'                => ['red', 'Accetta reso', 'bi-cart-x', false],
+                                                    'cancelled', 'completed' => ['secondary', 'Operazione completata', 'bi-check2-circle', true],
+                                                    default                  => ['primary', 'Aggiorna stato', 'bi-fast-forward-fill', false],
+                                                };
+                                            }
+                                        @endphp
+
+                                        <button class="btn btn-{{ $btn[0] }} w-100"
+                                                @unless($btn[3]) data-bs-toggle="modal" data-bs-target="#modal_popup_stato"
+                                                data-id="{{ $order->id }}" data-status="{{ $status }}" @endunless
+                                                {{ $btn[3] ? 'disabled' : '' }}>
+                                            <i class="bi {{ $btn[2] }}"></i> {{ $btn[1] }}
+                                        </button>
+
+
                                     </td>
                                 </tr>
                             @endforeach
@@ -129,28 +199,39 @@
                                 <p class="card-text searchable"><strong>Totale:</strong> {{ $order->total }} €</p>
 
                                 <div class="d-flex justify-content-between mt-3">
-                                    <a class="btn btn-success" href="{{ route('orders.show', $order->id) }}"><i
-                                            class="bi bi-search"></i> Dettagli</a>
-                                    @if (auth()->user()->role != 'admin')
-                                        @if ($order->status == 'completed')
-                                            <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#modal_reso"
-                                                data-id="{{ $order->id }}">
-                                                <i class="bi bi-cart-x"></i> Reso
-                                            </button>
-                                        @else
-                                            <button class="btn btn-danger" disabled><i class="bi bi-cart-x"></i> Reso</button>
-                                        @endif
-                                    @else
-                                        @if ($order->status == 'pending')
-                                            <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#modal_reso"
-                                                data-id="{{ $order->id }}">
-                                                <i class="bi bi-cart-x"></i> Accetta reso
-                                            </button>
-                                        @else
-                                            <button class="btn btn-danger" disabled><i class="bi bi-cart-x"></i> Accetta reso</button>
-                                        @endif
-                                    @endif
+                                <a class="btn btn-success" href="{{ route('orders.show', $order->id) }}"><i
+                                class="bi bi-search"></i> Dettagli</a>
+                                        @php
+                                            $role = auth()->user()->role;
+                                            $status = $order->status;
+                                            $canReturn = $order->canReturn(); // true/false
 
+                                            if ($role != 'admin') {
+                                                $btn = match($status) {
+                                                    'pending'   => ['danger', 'In attesa reso', 'bi-cart-x', true],
+                                                    'cancelled' => ['secondary', 'Reso completato', 'bi-check2-circle', true],
+                                                    'completed' => ['red', 'Reso', 'bi-cart-x', !$canReturn],
+                                                    default     => ['secondary', 'In attesa', 'bi-fast-forward-fill', true],
+                                                };
+                                                // Se non può fare il reso, override del bottone
+                                                if ($status == 'completed' && !$canReturn) {
+                                                    $btn = ['secondary', 'Operazione completata', 'bi-check2-circle', true];
+                                                }
+                                            } else {
+                                                $btn = match($status) {
+                                                    'pending'                => ['red', 'Accetta reso', 'bi-cart-x', false],
+                                                    'cancelled', 'completed' => ['secondary', 'Operazione completata', 'bi-check2-circle', true],
+                                                    default                  => ['primary', 'Aggiorna stato', 'bi-fast-forward-fill', false],
+                                                };
+                                            }
+                                        @endphp
+
+                                        <button class="btn btn-{{ $btn[0] }}"
+                                                @unless($btn[3]) data-bs-toggle="modal" data-bs-target="#modal_popup_stato"
+                                                data-id="{{ $order->id }}" data-status="{{ $status }}" @endunless
+                                                {{ $btn[3] ? 'disabled' : '' }}>
+                                            <i class="bi {{ $btn[2] }}"></i> {{ $btn[1] }}
+                                        </button>
                                 </div>
                             </div>
                         </div>
@@ -161,20 +242,21 @@
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="modal_reso" tabindex="-1" aria-labelledby="modalReso" aria-hidden="true">
+        <div class="modal fade" id="modal_popup_stato" tabindex="-1" aria-labelledby="modalPopPupStato" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="modalReso">Attenzione!</h1>
+                        <h1 class="modal-title fs-5" id="modalPopPupStato">Attenzione!</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        {{ auth()->user()->role != 'admin' ? 'Sei sicuro di voler fare il reso di questo ordine?' : 'Accettare il reso di questo ordine?'}}
+                        
                     </div>
                     <div class="modal-footer">
-                        <form id="resoForm" method="POST" action="">
+                        <form id="statoForm" method="POST" action="">
                             @csrf
-                            <button type="submit" class="btn btn-red"><i class="bi bi-cart-x"></i> Si</button>
+                            @method('PUT')
+                            <button type="submit" class=""></button>
                         </form>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-ban"></i>
                             No</button>

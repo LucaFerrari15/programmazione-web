@@ -1,8 +1,26 @@
 @extends('layouts.master')
 
-@section('title', 'Prodotti | JerseyShop')
+@section('title', "{$product->nome} | JerseyShop")
 
 @section('active_prodotti', 'active')
+
+@section('breadcrumb')
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <div class="col-10 offset-1">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('product.products') }}">Prodotti</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{$product->brand->nome}} -
+                            {{$product->nome}}
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+@endsection
 
 @section('contenuto_principale')
     <script>
@@ -82,28 +100,37 @@
                         </div>
 
                         <div class="text-end mt-2">
-                            @if (!$product->soldOut())
-                                @if(auth()->check())
-                                    <div id="size-error" class="c-red mb-2"></div>
+                            @if (auth()->check() && auth()->user()->role == 'admin')
+                                <a href="{{ route('product.edit', $product->id) }}" class="btn btn-primary">
+                                    <i class="bi bi-pencil"></i>
+                                    Modifica
+                                </a>
+                            @else
+                                @if (!$product->soldOut())
+                                    @if(auth()->check())
+                                        <div id="size-error" class="c-red mb-2"></div>
 
-                                    <button id="add-to-cart-btn-{{ $product->id }}" type="submit" class="btn btn-red">
+                                        <button id="add-to-cart-btn-{{ $product->id }}" type="submit" class="btn btn-red">
+                                            <i class="bi bi-cart-plus-fill"></i> Aggiungi al carrello
+                                        </button>
+
+
+
+                                    @else
+                                        <a href="{{ route('login') }}" class="btn btn-red">
+                                            <i class="bi bi-cart-plus-fill"></i>
+                                            Aggiungi al carrello
+                                        </a>
+                                    @endif
+                                    <p class="mt-2">{{ $product->prezzo }} €</p>
+                                @else
+                                    <button type="button" class="btn btn-danger" disabled="disabled">
                                         <i class="bi bi-cart-plus-fill"></i> Aggiungi al carrello
                                     </button>
-
-
-
-                                @else
-                                    <a href="{{ route('login') }}" class="btn btn-red">
-                                        <i class="bi bi-cart-plus-fill"></i>
-                                        Aggiungi al carrello
-                                    </a>
                                 @endif
-                                <p class="mt-2">{{ $product->prezzo }} €</p>
-                            @else
-                                <button type="button" class="btn btn-danger" disabled="disabled">
-                                    <i class="bi bi-cart-plus-fill"></i> Aggiungi al carrello
-                                </button>
                             @endif
+
+
                         </div>
                     </form>
 

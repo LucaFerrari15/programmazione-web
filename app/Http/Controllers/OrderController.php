@@ -88,7 +88,13 @@ class OrderController extends Controller
     {
 
         $dl = new DataLayer();
-        $order = $dl->findOrderByIdAndUser($id, auth()->user()->id);
+
+
+
+        if (auth()->user()->role != 'admin')
+            $order = $dl->findOrderByIdAndUser($id, auth()->user()->id);
+        else
+            $order = $dl->findOrderById($id);
 
         if ($order != null) {
             return view('orders.detailOrder')->with('order', $order);
@@ -102,18 +108,7 @@ class OrderController extends Controller
      */
     public function edit(string $id)
     {
-        $dl = new DataLayer();
-        if (auth()->user()->role != 'admin')
-            $order = $dl->findOrderByIdAndUser($id, auth()->user()->id);
-        else
-            $order = $dl->findOrderById($id);
 
-        if ($order != null) {
-            $dl->changeOrderStatus($order->id, (auth()->user()->role != 'admin') ? 'pending' : 'cancelled');
-            return Redirect::to(route('orders'));
-        } else {
-            return view('errors.wrongID');
-        }
     }
 
     /**
@@ -121,7 +116,39 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $dl = new DataLayer();
+
+
+        if (auth()->user()->role != 'admin')
+            $order = $dl->findOrderByIdAndUser($id, auth()->user()->id);
+        else
+            $order = $dl->findOrderById($id);
+
+
+
+        if ($order != null) {
+
+            if (auth()->user()->role != 'admin')
+                $dl->changeOrderStatus($order->id, 'pending');
+            else {
+                switch ($order->status) {
+                    case 'pending':
+                        $dl->changeOrderStatus($order->id, 'cancelled');
+                        break;
+                    case 'paid':
+                        $dl->changeOrderStatus($order->id, 'shipped');
+                        break;
+                    case 'shipped':
+                        $dl->changeOrderStatus($order->id, 'completed');
+                        break;
+                }
+
+            }
+
+            return Redirect::to(route('orders'));
+        } else {
+            return view('errors.wrongID');
+        }
     }
 
     /**

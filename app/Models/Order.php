@@ -47,4 +47,9 @@ class Order extends Model
         return $quantitaTotale;
     }
 
+    public function canReturn()
+    {
+        return $this->status == 'completed' && $this->updated_at->gt(now()->subWeeks(2));
+    }
+
 }

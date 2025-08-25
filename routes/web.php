@@ -12,9 +12,8 @@ require __DIR__ . '/auth.php';
 
 Route::get('/', [FrontController::class, 'getHome'])->name('home');
 
-Route::resource('products', ProductController::class);
 Route::get('/products', [ProductController::class, 'index'])->name('product.products');
-Route::get('/products/{id}/show', [ProductController::class, 'show'])->name('product.show');
+Route::get('/products/{id}', [ProductController::class, 'show'])->name('product.show');
 
 Route::get('/ajaxProduct', [ProductController::class, 'ajaxCheckForProducts']);
 
@@ -27,7 +26,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth', 'isRegisteredUser'])->group(function () {
 
 
-        Route::resource('cart', CartController::class);
         Route::get('/payment', [CartController::class, 'index'])->name('payment');
         Route::post('/cart/store', [CartController::class, 'store'])->name('cart.store');
         Route::delete('/card/{id}', [CartController::class, 'destroy'])->name('card.deleteItem');
@@ -40,9 +38,16 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
+    Route::middleware(['auth', 'isAdmin'])->group(function () {
+
+        Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
+
+    });
+
+
     Route::get('/orders', [OrderController::class, 'index'])->name('orders');
-    Route::get('/orders/{id}/show', [OrderController::class, 'show'])->name('orders.show');
-    Route::post('/orders/{id}/reso', [OrderController::class, 'edit'])->name('orders.reso');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{id}', [OrderController::class, 'update'])->name('orders.update');
 });
 
 

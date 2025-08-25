@@ -4,6 +4,23 @@
 
 @section('active_utente', 'active')
 
+@section('breadcrumb')
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <div class="col-10 offset-1">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                        <li class="breadcrumb-item active">{{ auth()->user()->name }}</li>
+                        <li class="breadcrumb-item"><a href="{{ route('orders') }}">Ordini</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Ordine N° {{$order->id}}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+@endsection
+
 @section('contenuto_principale')
     <div class="row mt-4">
         <div class="col offset-1">

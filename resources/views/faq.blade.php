@@ -4,9 +4,24 @@
 
 @section('active_faq', 'active')
 
+@section('breadcrumb')
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <div class="col-10 offset-1">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">F.A.Q.</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+@endsection
+
 @section('contenuto_principale')
-    <div class="row mt-4">
-        <div class="col-10 offset-1 my-5">
+    <div class="row">
+        <div class="col-10 offset-1">
             <h2 class="mb-4 text-center">Domande Frequenti</h2>
             <div class="accordion" id="faqAccordion">
                 <div class="accordion-item">
