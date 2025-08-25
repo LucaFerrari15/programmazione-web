@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\DataLayer;
 use App\Exceptions\ProductNotAvailableException;
 use App\Exceptions\CartEmptyException;
+use Illuminate\Support\Facades\Redirect;
 
 class OrderController extends Controller
 {
@@ -15,7 +16,10 @@ class OrderController extends Controller
     public function index()
     {
         $dl = new DataLayer();
-        $ordersList = $dl->listOrders(auth()->user()->id);
+        if (auth()->user()->role != 'admin')
+            $ordersList = $dl->listOrders(auth()->user()->id);
+        else
+            $ordersList = $dl->listAllOrders();
         return view('orders.orders')->with('order_list', $ordersList);
     }
 
@@ -89,7 +93,7 @@ class OrderController extends Controller
         if ($order != null) {
             return view('orders.detailOrder')->with('order', $order);
         } else {
-            return view('errors.wrongID')->with('message', "Oooops, something went wrong!");
+            return view('errors.wrongID');
         }
     }
 
@@ -98,7 +102,18 @@ class OrderController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $dl = new DataLayer();
+        if (auth()->user()->role != 'admin')
+            $order = $dl->findOrderByIdAndUser($id, auth()->user()->id);
+        else
+            $order = $dl->findOrderById($id);
+
+        if ($order != null) {
+            $dl->changeOrderStatus($order->id, (auth()->user()->role != 'admin') ? 'pending' : 'cancelled');
+            return Redirect::to(route('orders'));
+        } else {
+            return view('errors.wrongID');
+        }
     }
 
     /**
@@ -117,5 +132,17 @@ class OrderController extends Controller
         //
     }
 
+
+    public function ajaxCheckForOrders(Request $request)
+    {
+        $dl = new DataLayer();
+
+        if ($dl->$dl->findOrderByTerm($request->input('term'))) {
+            $response = array('found' => true);
+        } else {
+            $response = array('found' => false);
+        }
+        return response()->json($response);
+    }
 
 }

@@ -23,20 +23,26 @@ Route::get('/faq', [FrontController::class, 'getFaq'])->name('faq');
 Route::post('/faq/send', [ContactController::class, 'send'])->name('contact.send');
 
 
+Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'isRegisteredUser'])->group(function () {
 
-Route::middleware(['auth', 'isRegisteredUser'])->group(function () {
+
+        Route::resource('cart', CartController::class);
+        Route::get('/payment', [CartController::class, 'index'])->name('payment');
+        Route::post('/cart/store', [CartController::class, 'store'])->name('cart.store');
+        Route::delete('/card/{id}', [CartController::class, 'destroy'])->name('card.deleteItem');
 
 
-    Route::resource('cart', CartController::class);
-    Route::get('/payment', [CartController::class, 'index'])->name('payment');
-    Route::post('/cart/store', [CartController::class, 'store'])->name('cart.store');
-    Route::delete('/card/{id}', [CartController::class, 'destroy'])->name('card.deleteItem');
+
+
+        Route::post('/payment/checkout', [OrderController::class, 'store'])->name('orders.checkout');
+
+    });
 
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders');
     Route::get('/orders/{id}/show', [OrderController::class, 'show'])->name('orders.show');
-    Route::post('/payment/checkout', [OrderController::class, 'store'])->name('orders.checkout');
-
+    Route::post('/orders/{id}/reso', [OrderController::class, 'edit'])->name('orders.reso');
 });
 
 

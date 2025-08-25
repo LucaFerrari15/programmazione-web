@@ -84,8 +84,9 @@
                                 <i class="bi bi-person-circle"></i> {{ auth()->user()->name }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i> I
-                                        miei ordini</a></li>
+                                <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i>
+                                        {{ auth()->user()->role != 'admin' ? ' I
+                                                    miei ordini' : ' Storico ordini'}} </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -107,22 +108,25 @@
                     <li class="nav-item">
                         <div class="position-relative d-inline-block">
                             @if (auth()->check())
-                                <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas"
-                                    data-bs-target="#offcanvasCarrello" aria-controls="offcanvasCarrello">
-                                    <i class="bi bi-cart"></i> Carrello
-                                </button>
+                                @if (auth()->user()->role != 'admin')
+                                    <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas"
+                                        data-bs-target="#offcanvasCarrello" aria-controls="offcanvasCarrello">
+                                        <i class="bi bi-cart"></i> Carrello
+                                    </button>
+                                    @if (auth()->user()->cartItems()->count() > 0)
+                                        <span
+                                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ auth()->user()->cartItems()->sum('quantity') }}
+                                        </span>
+                                    @endif
+                                @endif
                             @else
                                 <a class="btn btn-outline-light" href="{{ route('login') }}"><i class="bi bi-cart"></i>
                                     Carrello</a>
                             @endif
 
 
-                            @if (auth()->check() && auth()->user()->cartItems()->count() > 0)
-                                <span
-                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {{ auth()->user()->cartItems()->sum('quantity') }}
-                                </span>
-                            @endif
+
                         </div>
 
                     </li>

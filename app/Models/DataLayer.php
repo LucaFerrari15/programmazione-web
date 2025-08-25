@@ -32,6 +32,25 @@ class DataLayer
         ;
     }
 
+    public function findOrderByTerm($term)
+    {
+        return Order::where(function ($query) use ($term) {
+            $query->where('id', 'LIKE', "%{$term}%")
+                ->orWhere('user_id', 'LIKE', "%{$term}%")
+                ->orWhere('status', 'LIKE', "%{$term}%")
+                ->orWhere('nome_spedizione', 'LIKE', "%{$term}%")
+                ->orWhere('cognome_spedizione', 'LIKE', "%{$term}%")
+                ->orWhere('via', 'LIKE', "%{$term}%")
+                ->orWhere('civico', 'LIKE', "%{$term}%")
+                ->orWhere('cap', 'LIKE', "%{$term}%")
+                ->orWhere('comune', 'LIKE', "%{$term}%")
+                ->orWhere('provincia', 'LIKE', "%{$term}%")
+                ->orWhere('paese', 'LIKE', "%{$term}%")
+                ->orWhere('total', 'LIKE', "%{$term}%");
+        })->get();
+    }
+
+
 
     public function listTeams()
     {
@@ -205,9 +224,29 @@ class DataLayer
         return $listOrder;
     }
 
+    public function listAllOrders()
+    {
+        return Order::all();
+    }
+
     public function findOrderByIdAndUser($id, $user_id)
     {
         $order = Order::where('id', $id)->where('user_id', $user_id)->first();
         return $order;
+    }
+
+    public function findOrderById($id)
+    {
+        $order = Order::find($id);
+        return $order;
+    }
+
+
+
+    public function changeOrderStatus($order_id, $status)
+    {
+        $order = Order::find($order_id);
+
+        $order->update(['status' => $status]);
     }
 }
