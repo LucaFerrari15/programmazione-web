@@ -6,7 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = ['nome', 'prezzo', 'descrizione', 'image_path'];
+    protected $fillable = [
+        'nome',
+        'descrizione',
+        'prezzo',
+        'brand_id',
+        'team_id',
+        'image_path',
+    ];
+
 
     public function sizes()
     {
@@ -23,6 +31,14 @@ class Product extends Model
             }
         }
         return true;
+    }
+
+    public function getAmoutGivenSize($id_sizeGiven) {
+        foreach ($this->sizes as $size) {
+            if ($size->pivot->id == $id_sizeGiven) {
+                return $size->pivot->quantita;
+            }
+        }
     }
 
 

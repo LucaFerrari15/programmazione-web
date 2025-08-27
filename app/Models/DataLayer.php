@@ -15,6 +15,12 @@ class DataLayer
         return $productsList;
     }
 
+    public function listSizes() 
+    {
+        $sizesList = Size::all();
+        return $sizesList;
+    }
+
     public function findProductById($id)
     {
         $product = Product::where('id', $id)->first();
@@ -30,6 +36,10 @@ class DataLayer
             return true;
         }
         ;
+    }
+
+    public function getOrderStatus() {
+        return Order::getStatusOptions();
     }
 
     public function findOrderByTerm($term)
@@ -220,14 +230,16 @@ class DataLayer
 
     public function listOrders($user_id)
     {
-        $listOrder = Order::where('user_id', $user_id)->get();
-        return $listOrder;
+        return Order::where('user_id', $user_id)
+            ->orderBy('id', 'desc')
+            ->get();
     }
 
     public function listAllOrders()
     {
-        return Order::all();
+        return Order::orderBy('id', 'desc')->get();
     }
+
 
     public function findOrderByIdAndUser($id, $user_id)
     {
@@ -248,5 +260,16 @@ class DataLayer
         $order = Order::find($order_id);
 
         $order->update(['status' => $status]);
+    }
+
+
+    public function findUserByemail($email) {
+        $users = User::where('email', $email)->get();
+        
+        if (count($users) == 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

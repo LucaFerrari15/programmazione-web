@@ -2,6 +2,12 @@
 
 @section('title', 'Prodotti | JerseyShop')
 
+@section('my_script')
+    <script src="{{ url('/') }}/js/productsFilter.js"></script>
+    <script src="{{ url('/') }}/js/paginationSearchFilter.js"></script>
+
+@endsection
+
 @section('active_prodotti', 'active')
 
 
@@ -21,23 +27,6 @@
 @endsection
 
 @section('contenuto_principale')
-    <script>
-        $(document).ready(function () {
-            $('#searchInput').on('keyup', function () {
-                var searchTerm = $(this).val().toLowerCase();
-
-                $('.row > div.col-6, .row > div.col-lg-4, .row > div.col-xl-3').each(function () {
-                    var productText = $(this).text().toLowerCase();
-
-                    if (productText.indexOf(searchTerm) !== -1) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-            });
-        });
-    </script>
 
 
 
@@ -46,7 +35,7 @@
         <div class="col-10 offset-1">
             @if (auth()->check() && auth()->user()->role == 'admin')
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('home') }}" class="btn btn-success align-left">
+                    <a href="{{ route('product.create') }}" class="btn btn-success align-left">
                         <i class="bi bi-database"></i>
                         Crea Maglia
                     </a>
@@ -66,43 +55,64 @@
             </div>
 
 
-            <div class="row">
+
+
+
+            <nav aria-label="Page navigation example" id="paginationNav" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" id="previousPage"><a class="page-link" href="#">Previous</a></li>
+                    <!-- Numeri di pagina -->
+                    <li class="page-item" id="nextPage"><a class="page-link" href="#">Next</a></li>
+                    <li>
+                        <select id="rowsPerPage" class="form-control justify-content-end">
+                            <option value="4">4 products per page</option>
+                            <option value="8">8 products per page</option>
+                            <option value="12">12 products per page</option>
+                            <option value="16">16 products per page</option>
+                        </select>
+                    </li>
+                </ul>
+            </nav>
+
+
+
+
+            <div id="row-container" class="row g-3 my-4">
                 @foreach ($products_list as $product)
-                    <div class="col-6 col-lg-4 col-xl-3 my-4">
-                        <a href="{{ route('product.show', $product->id) }}" class="text-decoration-none h-100">
-                            <div class="card h-100 position-relative">
-
-                                @php
-                                    $opacity = "";
-                                @endphp
-
+                    <div class="cardSearch col-6 col-lg-3 d-flex" data-team-id="{{ $product->team->id }}"
+                        data-brand-id="{{ $product->brand->id }}">
+                        <div class="card pagination-card equal-card position-relative w-100 shadow-sm d-flex flex-column">
+                            <a href="{{ route('product.show', $product->id) }}" class="text-decoration-none w-100 h-100">
+                                {{-- gestione opacity --}}
+                                @php $opacity = $product->soldOut() ? 'opacity-50' : ''; @endphp
                                 @if ($product->soldOut())
-                                    @php
-                                        $opacity = "opacity-50";
-                                    @endphp
                                     <div class="sold-out-overlay"></div>
                                 @endif
 
+                                {{-- immagine --}}
+                                <img src="{{ $product->image_path ? asset($product->image_path) : asset('img/products/null.png') }}"
+                                    class="card-img-top foto-maglia mt-4 {{ $opacity }}" alt="..." />
 
 
-                                @if (!$product->image_path)
-                                    <img src="{{ asset('storage/immagini_prodotti/logo senza sfondo.png') }}"
-                                        class="card-img-top foto-maglia w-100 mt-4 {{ $opacity }}" alt="..." />
-                                @else
-                                    <img src="{{ asset('storage/' . $product->image_path) }}"
-                                        class="card-img-top foto-maglia w-100 mt-4 {{ $opacity }}" alt="..." />
-                                @endif
 
+                                {{-- testo --}}
                                 <div class="card-body {{ $opacity }}">
-                                    <h5 class="card-title nome-maglia">{{ $product->brand->nome }} - {{ $product->nome }}
+                                    <h5 class="card-title nome-maglia searchable">{{ $product->brand->nome }} -
+                                        {{ $product->nome }}
                                     </h5>
+                                    <p class="card-title nome-maglia searchable">{{ $product->team->nome }}
+                                    </p>
                                     <p class="card-text prezzo-maglia text-end">{{ $product->prezzo }} €</p>
                                 </div>
-                            </div>
-                        </a>
+
+
+                            </a>
+                        </div>
                     </div>
                 @endforeach
             </div>
+
+
         </div>
     </div>
 

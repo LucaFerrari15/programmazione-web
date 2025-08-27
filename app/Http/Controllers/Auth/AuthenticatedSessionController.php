@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Redirect;
+use App\Models\DataLayer;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -48,5 +49,18 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    public function ajaxCheckForEmail(Request $request)
+    {
+        $dl = new DataLayer();
+        
+        if($dl->findUserByEmail($request->input('email')))
+        {
+            $response = array('found'=>true);
+        } else {
+            $response = array('found'=>false);
+        }
+        return response()->json($response);
     }
 }

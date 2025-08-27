@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
-    <link rel="icon" href="{{url('/')}}/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="{{ url('/') }}/img/favicon.ico" type="image/x-icon">
 
     <!-- Fogli di stile -->
     <link rel="stylesheet" href="{{ url('/') }}/css/bootstrap.min.css">
@@ -18,6 +18,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="{{ url('/') }}/js/bootstrap.min.js"></script>
 
+    @yield('my_script')
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -25,8 +27,8 @@
 
 <body class="d-flex flex-column min-vh-100">
     <script>
-        $(document).ready(function () {
-            $('#modal_carrello').on('show.bs.modal', function (event) {
+        $(document).ready(function() {
+            $('#modal_carrello').on('show.bs.modal', function(event) {
                 var button = $(event.relatedTarget); // bottone che ha triggerato il modal
                 var itemId = button.data('id'); // prendi id
 
@@ -39,9 +41,9 @@
 
 
 
-    @if(session('open_cart_offcanvas'))
+    @if (session('open_cart_offcanvas'))
         <script>
-            $(document).ready(function () {
+            $(document).ready(function() {
                 var cartOffcanvasEl = $('#offcanvasCarrello')[0];
                 var cartOffcanvas = new bootstrap.Offcanvas(cartOffcanvasEl);
                 cartOffcanvas.show();
@@ -55,22 +57,22 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container-fluid col-10 offset-1 bg-dark">
-            <a class="navbar-brand col-lg-2 mx-0" href="{{route('home')}}">🏀 JerseyShop</a>
+            <a class="navbar-brand col-lg-2 mx-0" href="{{ route('home') }}">🏀 JerseyShop</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse col-lg-10" id="navbarNav">
                 <ul class="navbar-nav col-lg-6 justify-content-end">
                     <li class="nav-item">
-                        <a class="nav-link @yield('active_home')" href="{{route('home')}}"><i class="bi bi-house"></i>
+                        <a class="nav-link @yield('active_home')" href="{{ route('home') }}"><i class="bi bi-house"></i>
                             Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @yield('active_prodotti')" href="{{route('product.products')}}"><i
+                        <a class="nav-link @yield('active_prodotti')" href="{{ route('product.products') }}"><i
                                 class="bi bi-shop"></i> Prodotti</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @yield('active_faq')" href="{{route('faq')}}"><i
+                        <a class="nav-link @yield('active_faq')" href="{{ route('faq') }}"><i
                                 class="bi bi-question-circle"></i>
                             F.A.Q.</a>
                     </li>
@@ -85,8 +87,11 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i>
-                                        {{ auth()->user()->role != 'admin' ? ' I
-                                                                miei ordini' : ' Storico ordini'}} </a></li>
+                                        {{ auth()->user()->role != 'admin'
+                                            ? ' I
+                                                                                                                                                                                        miei ordini'
+                                            : ' Storico ordini' }}
+                                    </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -153,10 +158,12 @@
                         <!-- Form per fare logout -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="btn btn-red"><i class="bi bi-box-arrow-left"></i> Logout</button>
+                            <button type="submit" class="btn btn-red"><i class="bi bi-box-arrow-left"></i>
+                                Logout</button>
                         </form>
 
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-ban"></i>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                                class="bi bi-ban"></i>
                             Annulla</button>
 
 
@@ -169,7 +176,8 @@
 
 
         <!-- Offcanvas carrello -->
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCarrello" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCarrello"
+            aria-labelledby="offcanvasRightLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="offcanvasRightLabel">
                     Carrello
@@ -186,13 +194,13 @@
                                         alt="{{ $singleItem->product->nome }}" class="foto-maglia mt-4">
 
                                     <div class="card-body">
-                                        <h5 class="card-title nome-maglia">{{$singleItem->product->brand->nome}} -
-                                            {{$singleItem->product->nome}}
+                                        <h5 class="card-title nome-maglia">{{ $singleItem->product->brand->nome }} -
+                                            {{ $singleItem->product->nome }}
                                         </h5>
                                         <div class="d-flex justify-content-end align-items-baseline">
-                                            <p class="card-text prezzo-maglia">{{$singleItem->product->prezzo}}</p>
+                                            <p class="card-text prezzo-maglia">{{ $singleItem->product->prezzo }}</p>
                                             <p class="card-text offset-1">
-                                                {{$singleItem->quantity}} x {{$singleItem->size->nome}}
+                                                {{ $singleItem->quantity }} x {{ $singleItem->size->nome }}
                                             </p>
                                         </div>
                                     </div>
@@ -223,26 +231,28 @@
                                 $sum += $singleItem->product->prezzo * $singleItem->quantity;
                             }
                         @endphp
-                        Totale: {{number_format($sum, 2)}}€
+                        Totale: {{ number_format($sum, 2) }}€
                     </div>
                     @if (auth()->user()->cartItems()->sum('quantity') < 1)
                         <a href="" class="btn btn-success disabled"><i class="bi bi-bank"></i> Paga</a>
                     @else
-                        <a href="{{route('payment')}}" class="btn btn-success"><i class="bi bi-bank"></i> Paga</a>
+                        <a href="{{ route('payment') }}" class="btn btn-success"><i class="bi bi-bank"></i> Paga</a>
                     @endif
                 </div>
             </div>
         </div>
 
         <!-- Modal per cancellare elemento -->
-        <div class="modal fade " id="modal_carrello" tabindex="-1" aria-labelledby="modalCarrello" aria-hidden="true">
+        <div class="modal fade " id="modal_carrello" tabindex="-1" aria-labelledby="modalCarrello"
+            aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="modalCarrello">
                             Attenzione!
                         </h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         Sei sicuro di voler eliminare questo elemento?

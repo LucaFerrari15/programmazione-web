@@ -13,7 +13,7 @@
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
                         <li class="breadcrumb-item active">{{ auth()->user()->name }}</li>
                         <li class="breadcrumb-item"><a href="{{ route('orders') }}">Ordini</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Ordine N° {{$order->id}}</li>
+                        <li class="breadcrumb-item active" aria-current="page">Ordine N° {{ $order->id }}</li>
                     </ol>
                 </nav>
             </div>
@@ -28,7 +28,7 @@
                 Indietro</a>
         </div>
     </div>
-    @if(isset($message_success))
+    @if (isset($message_success))
         <div class="row mt-4">
             <div class="col offset-1">
                 <div class="alert alert-success">
@@ -50,6 +50,17 @@
                             {{ $order->id }}
                         </div>
                     </div>
+
+                    @if (auth()->user()->role == 'admin')
+                        <div class="row mb-3">
+                            <div class="col-md-3 col-5 fw-bold">
+                                Utente:
+                            </div>
+                            <div class="col-md-9 col-7">
+                                {{ $order->user->name }}, {{ $order->user->email }}
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="row mb-3">
                         <div class="col-md-3 col-5 fw-bold">
@@ -77,15 +88,14 @@
                         <div class="col-md-9 col-7">
                             <ul class="list-group list-group-flush">
                                 @foreach ($order->items()->get() as $singleItem)
-                                                            <li class="p-0 list-group-item">
-                                                                <p>{{$singleItem->product->brand->nome}} -
-                                                                    {{$singleItem->product->nome}} - {{$singleItem->quantity}} x
-                                                                    {{$singleItem->size->nome}} - <strong>{{number_format(
-                                        $singleItem->product->prezzo * $singleItem->quantity,
-                                        2
-                                    )}} €</strong>
-                                                                </p>
-                                                            </li>
+                                    <li class="p-0 list-group-item">
+                                        <p>{{ $singleItem->product->brand->nome }} -
+                                            {{ $singleItem->product->nome }} - {{ $singleItem->quantity }} x
+                                            {{ $singleItem->size->nome }} -
+                                            {{ number_format($singleItem->product->prezzo * $singleItem->quantity, 2) }}
+                                            €
+                                        </p>
+                                    </li>
                                 @endforeach
                             </ul>
 
@@ -107,7 +117,7 @@
                             Stato:
                         </div>
                         <div class="col-md-9 col-7">
-                            {{ $order->status }}
+                            <strong>{{ $order->status }}</strong>
                         </div>
                     </div>
 

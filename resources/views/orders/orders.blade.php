@@ -2,6 +2,12 @@
 
 @section('title', 'I tuoi ordini | JerseyShop')
 
+@section('my_script')
+    <script src="{{ url('/') }}/js/ordersFilter.js"></script>
+    <script src="{{ url('/') }}/js/paginationSearchFilter.js"></script>
+
+@endsection
+
 @section('active_utente', 'active')
 
 @section('breadcrumb')
@@ -22,31 +28,16 @@
 
 @section('contenuto_principale')
     <script>
-        $(document).ready(function () {
-            $('#searchInput').on('keyup', function () {
-                var searchTerm = $(this).val().toLowerCase();
-
-                // Filtro righe tabella (desktop)
-                $('table tbody tr').each(function () {
-                    var rowText = $(this).find('.searchable').text().toLowerCase();
-                    $(this).toggle(rowText.indexOf(searchTerm) !== -1);
-                });
-
-                // Filtro card (mobile)
-                $('.card').each(function () {
-                    var cardText = $(this).find('.searchable').text().toLowerCase();
-                    $(this).toggle(cardText.indexOf(searchTerm) !== -1);
-                });
-            });
+        $(document).ready(function() {
 
 
 
 
 
-            $('#modal_popup_stato').on('show.bs.modal', function (event) {
+            $('#modal_popup_stato').on('show.bs.modal', function(event) {
                 var button = $(event.relatedTarget); // Bottone che apre il modal
-                var orderId = button.data('id');     // Prendi l'id
-                var status = button.data('status');  // Prendi lo stato
+                var orderId = button.data('id'); // Prendi l'id
+                var status = button.data('status'); // Prendi lo stato
                 var form = $(this).find('#statoForm');
                 var modalBody = $(this).find('.modal-body');
                 var submitBtn = form.find('button[type="submit"]');
@@ -91,147 +82,136 @@
             });
 
         });
-
     </script>
 
 
 
+
+
+
+
+
+
+
     <div class="">
-        <div class="row">
-            <div class="col-10 offset-1 mt-4">
-                <div role="search">
-                    <input id="searchInput" class="form-control" type="search" placeholder="Cerca ordine..."
-                        aria-label="Search" />
-                </div>
+        <div class="col-10 offset-1 d-flex justify-content-between align-items-center mt-4">
+            <div class="flex-grow-1 me-2" role="search">
+                <input id="searchInput" class="form-control" type="search" placeholder="Cerca ordine..."
+                    aria-label="Search" />
+
             </div>
+            <!-- Bottone per aprire i filtri -->
+            <button class="btn btn-red" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtroOffcanvas"
+                aria-controls="filtroOffcanvas">
+                <i class="bi bi-funnel-fill"></i><span class="d-none d-lg-inline"> Filtri</span>
+            </button>
         </div>
+
+        <nav aria-label="Page navigation example" id="paginationNav" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" id="previousPage"><a class="page-link" href="#">Previous</a></li>
+                <!-- Numeri di pagina -->
+                <li class="page-item" id="nextPage"><a class="page-link" href="#">Next</a></li>
+                <li>
+                    <select id="rowsPerPage" class="form-control justify-content-end">
+                        <option value="1">1 orders per page</option>
+                        <option value="2">2 orders per page</option>
+                        <option value="4">4 orders per page</option>
+                        <option value="8">8 orders per page</option>
+                        <option value="12">12 orders per page</option>
+                        <option value="16">26 orders per page</option>
+                    </select>
+                </li>
+            </ul>
+        </nav>
+
+
         <div class="row">
             <div class="col-10 offset-1 my-4">
 
-                {{-- Tabella desktop --}}
-                <div class="d-none d-lg-block">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Cod. Ordine</th>
-                                <th>Data di Acquisto</th>
-                                <th>Spedito a</th>
-                                <th>Indirizzo di Spedizione</th>
-                                <th>Stato Ordine</th>
-                                <th>Quantità</th>
-                                <th>Totale</th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($order_list as $order)
-                                <tr>
-                                    <td class="searchable">{{ $order->id }}</td>
-                                    <td class="searchable">{{ $order->dataDiCreazioneOrdineFormattata() }}</td>
-                                    <td class="searchable">{{ $order->nome_spedizione }} {{ $order->cognome_spedizione }}</td>
-                                    <td class="searchable">{{ $order->via }} {{ $order->civico }}, {{ $order->cap }},
-                                        {{ $order->comune }}, {{ $order->provincia }}, {{ $order->paese }}
-                                    </td>
-                                    <td class="searchable">{{ $order->status }}</td>
-                                    <td class="searchable">{{ $order->quantitaTotale() }}</td>
-                                    <td class="searchable">{{ $order->total }} €</td>
-                                    <td><a class="btn btn-success" href="{{ route('orders.show', $order->id) }}"><i
-                                                class="bi bi-search"></i> Dettagli</a></td>
-                                    <td>
-                                        @php
-                                            $role = auth()->user()->role;
-                                            $status = $order->status;
-                                            $canReturn = $order->canReturn(); // true/false
 
-                                            if ($role != 'admin') {
-                                                $btn = match($status) {
-                                                    'pending'   => ['danger', 'In attesa reso', 'bi-cart-x', true],
-                                                    'cancelled' => ['secondary', 'Reso completato', 'bi-check2-circle', true],
-                                                    'completed' => ['red', 'Reso', 'bi-cart-x', !$canReturn],
-                                                    default     => ['secondary', 'In attesa', 'bi-fast-forward-fill', true],
-                                                };
-                                                // Se non può fare il reso, override del bottone
-                                                if ($status == 'completed' && !$canReturn) {
-                                                    $btn = ['secondary', 'Operazione completata', 'bi-check2-circle', true];
-                                                }
-                                            } else {
-                                                $btn = match($status) {
-                                                    'pending'                => ['red', 'Accetta reso', 'bi-cart-x', false],
-                                                    'cancelled', 'completed' => ['secondary', 'Operazione completata', 'bi-check2-circle', true],
-                                                    default                  => ['primary', 'Aggiorna stato', 'bi-fast-forward-fill', false],
-                                                };
-                                            }
-                                        @endphp
-
-                                        <button class="btn btn-{{ $btn[0] }} w-100"
-                                                @unless($btn[3]) data-bs-toggle="modal" data-bs-target="#modal_popup_stato"
-                                                data-id="{{ $order->id }}" data-status="{{ $status }}" @endunless
-                                                {{ $btn[3] ? 'disabled' : '' }}>
-                                            <i class="bi {{ $btn[2] }}"></i> {{ $btn[1] }}
-                                        </button>
-
-
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- Card mobile --}}
-                <div class="d-block d-lg-none">
+                <div id="row-container" class="row g-3">
                     @foreach ($order_list as $order)
-                        <div class="card mb-3 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title searchable">Cod. Ordine: {{ $order->id }}</h5>
-                                <p class="card-text searchable"><strong>Data:</strong>
-                                    {{ $order->dataDiCreazioneOrdineFormattata() }}</p>
-                                <p class="card-text searchable"><strong>Spedito a:</strong> {{ $order->nome_spedizione }}
-                                    {{ $order->cognome_spedizione }}
-                                </p>
-                                <p class="card-text searchable"><strong>Indirizzo di Spedizione:</strong> {{ $order->via }}
-                                    {{ $order->civico }}, {{ $order->cap }}, {{ $order->comune }}, {{ $order->provincia }},
-                                    {{ $order->paese }}
-                                </p>
-                                <p class="card-text searchable"><strong>Stato:</strong> {{ $order->status }}</p>
-                                <p class="card-text searchable"><strong>Quantità:</strong> {{ $order->quantitaTotale() }}</p>
-                                <p class="card-text searchable"><strong>Totale:</strong> {{ $order->total }} €</p>
+                        <div class="col-12 mb-3">
+                            <div class="card pagination-card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title searchable">Cod. Ordine: {{ $order->id }}</h5>
+                                    @if (auth()->user()->role == 'admin')
+                                        <p class="card-text searchable"><strong>Utente:</strong>
+                                            {{ $order->user->name }}, {{ $order->user->email }}
+                                        </p>
+                                    @endif
+                                    <p class="card-text searchable"><strong>Data:</strong>
+                                        {{ $order->dataDiCreazioneOrdineFormattata() }}
+                                    <p class="card-text searchable"><strong>Spedito a:</strong>
+                                        {{ $order->nome_spedizione }} {{ $order->cognome_spedizione }}</p>
+                                    <p class="card-text searchable"><strong>Indirizzo:</strong> {{ $order->via }}
+                                        {{ $order->civico }}, {{ $order->cap }}, {{ $order->comune }},
+                                        {{ $order->provincia }}, {{ $order->paese }}</p>
+                                    <p class="card-text searchable"><strong>Stato:</strong> {{ $order->status }}</p>
+                                    <p class="card-text searchable"><strong>Quantità:</strong>
+                                        {{ $order->quantitaTotale() }}</p>
+                                    <p class="card-text searchable"><strong>Totale:</strong> {{ $order->total }} €</p>
 
-                                <div class="d-flex justify-content-between mt-3">
-                                <a class="btn btn-success" href="{{ route('orders.show', $order->id) }}"><i
-                                class="bi bi-search"></i> Dettagli</a>
+                                    <div class="d-flex justify-content-between mt-3">
+                                        <a class="btn btn-success" href="{{ route('orders.show', $order->id) }}"><i
+                                                class="bi bi-search"></i> Dettagli</a>
+
                                         @php
                                             $role = auth()->user()->role;
                                             $status = $order->status;
-                                            $canReturn = $order->canReturn(); // true/false
+                                            $canReturn = $order->canReturn();
 
                                             if ($role != 'admin') {
-                                                $btn = match($status) {
-                                                    'pending'   => ['danger', 'In attesa reso', 'bi-cart-x', true],
-                                                    'cancelled' => ['secondary', 'Reso completato', 'bi-check2-circle', true],
+                                                $btn = match ($status) {
+                                                    'pending' => ['danger', 'In attesa reso', 'bi-cart-x', true],
+                                                    'cancelled' => [
+                                                        'secondary',
+                                                        'Reso completato',
+                                                        'bi-check2-circle',
+                                                        true,
+                                                    ],
                                                     'completed' => ['red', 'Reso', 'bi-cart-x', !$canReturn],
-                                                    default     => ['secondary', 'In attesa', 'bi-fast-forward-fill', true],
+                                                    default => [
+                                                        'secondary',
+                                                        'In attesa',
+                                                        'bi-fast-forward-fill',
+                                                        true,
+                                                    ],
                                                 };
-                                                // Se non può fare il reso, override del bottone
                                                 if ($status == 'completed' && !$canReturn) {
-                                                    $btn = ['secondary', 'Operazione completata', 'bi-check2-circle', true];
+                                                    $btn = [
+                                                        'secondary',
+                                                        'Operazione completata',
+                                                        'bi-check2-circle',
+                                                        true,
+                                                    ];
                                                 }
                                             } else {
-                                                $btn = match($status) {
-                                                    'pending'                => ['red', 'Accetta reso', 'bi-cart-x', false],
-                                                    'cancelled', 'completed' => ['secondary', 'Operazione completata', 'bi-check2-circle', true],
-                                                    default                  => ['primary', 'Aggiorna stato', 'bi-fast-forward-fill', false],
+                                                $btn = match ($status) {
+                                                    'pending' => ['red', 'Accetta reso', 'bi-cart-x', false],
+                                                    'cancelled', 'completed' => [
+                                                        'secondary',
+                                                        'Operazione completata',
+                                                        'bi-check2-circle',
+                                                        true,
+                                                    ],
+                                                    default => [
+                                                        'primary',
+                                                        'Aggiorna stato',
+                                                        'bi-fast-forward-fill',
+                                                        false,
+                                                    ],
                                                 };
                                             }
                                         @endphp
 
                                         <button class="btn btn-{{ $btn[0] }}"
-                                                @unless($btn[3]) data-bs-toggle="modal" data-bs-target="#modal_popup_stato"
-                                                data-id="{{ $order->id }}" data-status="{{ $status }}" @endunless
-                                                {{ $btn[3] ? 'disabled' : '' }}>
+                                            @unless ($btn[3]) data-bs-toggle="modal" data-bs-target="#modal_popup_stato" data-id="{{ $order->id }}" data-status="{{ $status }}" @endunless
+                                            {{ $btn[3] ? 'disabled' : '' }}>
                                             <i class="bi {{ $btn[2] }}"></i> {{ $btn[1] }}
                                         </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -250,7 +230,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        
+
                     </div>
                     <div class="modal-footer">
                         <form id="statoForm" method="POST" action="">
@@ -266,5 +246,40 @@
         </div>
 
 
+    </div>
+
+
+
+
+    <!-- OFFCANVAS FILTRI -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="filtroOffcanvas" aria-labelledby="filtroOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 id="filtroOffcanvasLabel">Filtri</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Chiudi"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h6>Ordina per</h6>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="ordineOrdine" id="piuRecente" value="piuRecente"
+                    checked />
+                <label class="form-check-label" for="piuRecente">Più Recente</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="ordineOrdine" id="piuVecchio"
+                    value="piuVecchio" />
+                <label class="form-check-label" for="piuVecchio">Più Vecchio</label>
+            </div>
+            <hr>
+
+            <h6>Stato ordine</h6>
+            @foreach ($order_status as $status)
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="status[]" id="status{{ $status }}"
+                        value="{{ $status }}">
+                    <label class="form-check-label" for="status{{ $status }}">{{ $status }}</label>
+                </div>
+            @endforeach
+
+        </div>
     </div>
 @endsection
