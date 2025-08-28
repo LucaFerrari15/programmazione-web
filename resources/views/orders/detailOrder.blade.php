@@ -30,7 +30,7 @@
     </div>
     @if (isset($message_success))
         <div class="row mt-4">
-            <div class="col offset-1">
+            <div class="col-10 offset-1">
                 <div class="alert alert-success">
                     {{ $message_success }}
                 </div>
@@ -89,8 +89,9 @@
                             <ul class="list-group list-group-flush">
                                 @foreach ($order->items()->get() as $singleItem)
                                     <li class="p-0 list-group-item">
-                                        <p>{{ $singleItem->product->brand->nome }} -
-                                            {{ $singleItem->product->nome }} - {{ $singleItem->quantity }} x
+                                        <p><a href="{{ route('product.show', $singleItem->product->id) }}">{{ $singleItem->product->brand->nome }}
+                                                -
+                                                {{ $singleItem->product->nome }}</a> - {{ $singleItem->quantity }} x
                                             {{ $singleItem->size->nome }} -
                                             {{ number_format($singleItem->product->prezzo * $singleItem->quantity, 2) }}
                                             €

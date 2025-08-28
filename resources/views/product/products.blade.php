@@ -58,7 +58,7 @@
 
 
 
-            <nav aria-label="Page navigation example" id="paginationNav" class="mt-4">
+            <nav aria-label="Page navigation example" id="paginationNav" class="col-10 offset-1 mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" id="previousPage"><a class="page-link" href="#">Previous</a></li>
                     <!-- Numeri di pagina -->
@@ -79,7 +79,7 @@
 
             <div id="row-container" class="row g-3 my-4">
                 @foreach ($products_list as $product)
-                    <div class="cardSearch col-6 col-lg-3 d-flex" data-team-id="{{ $product->team->id }}"
+                    <div class="cardSearch col-12 col-md-6 col-lg-3 d-flex" data-team-id="{{ $product->team->id }}"
                         data-brand-id="{{ $product->brand->id }}">
                         <div class="card pagination-card equal-card position-relative w-100 shadow-sm d-flex flex-column">
                             <a href="{{ route('product.show', $product->id) }}" class="text-decoration-none w-100 h-100">

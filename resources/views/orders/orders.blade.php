@@ -107,19 +107,19 @@
             </button>
         </div>
 
-        <nav aria-label="Page navigation example" id="paginationNav" class="mt-4">
+        <nav aria-label="Page navigation example" id="paginationNav" class="col-10 offset-1 mt-4">
             <ul class="pagination justify-content-center">
                 <li class="page-item" id="previousPage"><a class="page-link" href="#">Previous</a></li>
                 <!-- Numeri di pagina -->
                 <li class="page-item" id="nextPage"><a class="page-link" href="#">Next</a></li>
                 <li>
                     <select id="rowsPerPage" class="form-control justify-content-end">
-                        <option value="1">1 orders per page</option>
-                        <option value="2">2 orders per page</option>
-                        <option value="4">4 orders per page</option>
-                        <option value="8">8 orders per page</option>
-                        <option value="12">12 orders per page</option>
-                        <option value="16">26 orders per page</option>
+                        <option value="5">5 orders per page</option>
+                        <option value="10">10 orders per page</option>
+                        <option value="15">15 orders per page</option>
+                        <option value="20">20 orders per page</option>
+                        <option value="25">25 orders per page</option>
+                        <option value="30">30 orders per page</option>
                     </select>
                 </li>
             </ul>
@@ -133,7 +133,7 @@
                 <div id="row-container" class="row g-3">
                     @foreach ($order_list as $order)
                         <div class="col-12 mb-3">
-                            <div class="card pagination-card h-100 shadow-sm">
+                            <div class="card cardSearch pagination-card h-100 shadow-sm">
                                 <div class="card-body">
                                     <h5 class="card-title searchable">Cod. Ordine: {{ $order->id }}</h5>
                                     @if (auth()->user()->role == 'admin')

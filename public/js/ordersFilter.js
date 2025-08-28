@@ -1,6 +1,6 @@
 $(document).ready(function () {
     // La classe da usare per la selezione delle card è .card, come da HTML
-    var $allCards = $(".card");
+    var $allCards = $(".cardSearch");
 
     function applyFiltersAndSort() {
         var selectedStatus = $('input[name="status[]"]:checked')

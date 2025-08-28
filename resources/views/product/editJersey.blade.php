@@ -33,6 +33,147 @@
 @endsection
 
 @section('contenuto_principale')
+    <script>
+        $(document).ready(function() {
+            $("input[name='image_path']").on("change", function() {
+                var foto = this.files[0];
+                if (foto) {
+                    var allowedTypes = ['image/jpeg', 'image/png'];
+                    if ($.inArray(foto.type, allowedTypes) !== -1) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            $(".foto-maglia").attr("src", e.target.result);
+                        };
+                        reader.readAsDataURL(foto);
+                    } else {
+                        $("#invalid-foto").text("Tipo di file non valido. Seleziona un file JPG o PNG.");
+                        $(this).val(""); // reset input file
+                    }
+                }
+            });
+
+            function validateForm() {
+                var error = false;
+                var numericRegex = /^-?\d+(\.\d+)?$/;
+                var intRegex = /^\d+$/;
+
+                var brand = $("#jersey-form select[name='floatingSelectMarca']").val();
+                var nome = $("#jersey-form input[name='nome_maglia']").val();
+                var descrizione = $("#jersey-form textarea[name='descrizione']").val();
+                var team = $("#jersey-form select[name='floatingSelectTeam']").val();
+                var prezzo = $("#jersey-form input[name='prezzo']").val();
+
+                var quantita_taglie = {};
+                $("#jersey-form input[name^='size-']").each(function() {
+                    var inputName = $(this).attr('name');
+                    var sizeId = inputName.split('-')[1];
+                    var quantita = $(this).val();
+                    quantita_taglie[sizeId] = quantita;
+                });
+
+                var foto = $("#jersey-form input[name='image_path']")[0].files[0];
+
+                // BRAND
+                if (!brand || brand.trim() === "") {
+                    error = true;
+                    $("#invalid-brand").text("La marca è obbligatoria.");
+                    $("select[name='floatingSelectMarca']").focus();
+                } else {
+                    $("#invalid-brand").text("");
+                }
+
+                // NOME
+                if (!nome || nome.trim() === "") {
+                    error = true;
+                    $("#invalid-nome").text("Il nome è obbligatorio.");
+                    $("input[name='nome_maglia']").focus();
+                } else {
+                    $("#invalid-nome").text("");
+                }
+
+                // DESCRIZIONE
+                if (!descrizione || descrizione.trim() === "") {
+                    error = true;
+                    $("#invalid-descrizione").text("La descrizione è obbligatoria.");
+                    $("textarea[name='descrizione']").focus();
+                } else {
+                    $("#invalid-descrizione").text("");
+                }
+
+                // TEAM
+                if (!team || team.trim() === "") {
+                    error = true;
+                    $("#invalid-team").text("La squadra è obbligatoria.");
+                    $("select[name='floatingSelectTeam']").focus();
+                } else {
+                    $("#invalid-team").text("");
+                }
+
+                // PREZZO
+                if (!prezzo || prezzo.trim() === "") {
+                    error = true;
+                    $("#invalid-prezzo").text("Il prezzo è obbligatorio.");
+                    $("input[name='prezzo']").focus();
+                } else if (!numericRegex.test(prezzo)) {
+                    error = true;
+                    $("#invalid-prezzo").text("Il prezzo deve essere un numero.");
+                    $("input[name='prezzo']").focus();
+                } else {
+                    $("#invalid-prezzo").text("");
+                }
+
+                // TAGLIE
+                var errorTaglie = false;
+                for (var sizeId in quantita_taglie) {
+                    if (quantita_taglie[sizeId].trim() === "" || !intRegex.test(quantita_taglie[sizeId])) {
+                        error = true;
+                        errorTaglie = true;
+                        $("#invalid-taglie").text("Le taglie devono essere un intero maggiore o uguale a 0.");
+                        $("input[name='size-" + sizeId + "']").focus();
+                    }
+                }
+                if (!errorTaglie) {
+                    $("#invalid-taglie").text("");
+                }
+
+                // FOTO
+                if (foto) {
+                    var allowedTypes = ['image/jpeg', 'image/png'];
+                    if ($.inArray(foto.type, allowedTypes) === -1) {
+                        error = true;
+                        $("#invalid-foto").text("Tipo di file non valido. Seleziona un file JPG o PNG.");
+                        $("input[name='image_path']").focus();
+                    } else {
+                        $("#invalid-foto").text("");
+                    }
+                } else {
+                    $("#invalid-foto").text("");
+                }
+
+                return !error;
+            }
+
+            // intercetto il click su "Conferma"
+            $("#confirmModal button[type='submit']").on('click', function(e) {
+                e.preventDefault(); // blocca invio immediato
+
+                if (validateForm()) {
+                    // se è valido --> invia il form
+                    $("#jersey-form").off('submit').submit();
+                } else {
+                    // se NON valido --> chiudo modale
+                    $("#confirmModal").modal('hide');
+                }
+            });
+        });
+    </script>
+
+
+
+
+
+
+
     <div class="row mt-4">
         <div class="col offset-1">
             @if (isset($product))
@@ -50,18 +191,19 @@
     <div class="col-10 offset-1 my-4">
         <div class="row">
             @if (isset($product))
-                <form class="form-horizontal" name="jersey" method="post"
+                <form class="form-horizontal" id="jersey-form" name="jersey" method="post"
                     action="{{ route('product.update', $product->id) }}" enctype="multipart/form-data">
                     @method('PUT')
                 @else
-                    <form class="form-horizontal" name="jersey" method="post" action="{{ route('product.store') }}"
-                        enctype="multipart/form-data">
+                    <form class="form-horizontal" id="jersey-form" name="jersey" method="post"
+                        action="{{ route('product.store') }}" enctype="multipart/form-data">
             @endif
             @csrf
 
             <div class="row">
                 <div class="col-12 col-lg-6">
                     {{-- BRAND --}}
+                    <span class="invalid-input text-danger d-block" id="invalid-brand"></span>
                     <div class="form-floating mb-2">
                         <select class="form-select" id="floatingSelectMarca" name="floatingSelectMarca">
 
@@ -78,6 +220,7 @@
 
 
                     {{-- NOME --}}
+                    <span class="invalid-input text-danger d-block" id="invalid-nome"></span>
                     <div class="form-floating mb-2">
                         @if (isset($product))
                             <input class="form-control" type="text" name="nome_maglia" value="{{ $product->nome }}" />
@@ -89,6 +232,7 @@
 
 
                     {{-- DESCRIZIONE --}}
+                    <span class="invalid-input text-danger d-block" id="invalid-descrizione"></span>
                     <div class="form-floating mb-2">
                         @if (isset($product))
                             <textarea class="form-control h-auto" type="text" name="descrizione">{{ $product->descrizione }}</textarea>
@@ -100,6 +244,7 @@
 
 
                     {{-- SQUADRA --}}
+                    <span class="invalid-input text-danger d-block" id="invalid-team"></span>
                     <div class="form-floating mb-2">
                         <select class="form-select" id="floatingSelectTeam" name="floatingSelectTeam">
 
@@ -116,6 +261,7 @@
 
 
                     {{-- PREZZO --}}
+                    <span class="invalid-input text-danger d-block" id="invalid-prezzo"></span>
                     <div class="form-floating mb-2">
                         @if (isset($product))
                             <input class="form-control" type="number" name="prezzo" value="{{ $product->prezzo }}"
@@ -128,6 +274,7 @@
 
 
                     {{-- TAGLIE --}}
+                    <span class="invalid-input text-danger d-block" id="invalid-taglie"></span>
                     <div class="d-flex flex-wrap">
                         @foreach ($list_sizes as $size)
                             <div class="form-floating mb-2 me-2 col-3 col-lg">
@@ -145,11 +292,12 @@
 
 
                     {{-- CARICAMENTO FOTO --}}
+                    <span class="invalid-input text-danger d-block" id="invalid-foto"></span>
                     <div class="form-floating mb-2">
 
 
-                        <input class="form-control" type="file" name="image_path" />
-                        <label for="image_path">Immagine Maglia</label>
+                        <input class="form-control" type="file" name="image_path" accept=".jpg, .png" />
+                        <label for="image_path">Immagine Maglia (JPG o PNG)</label>
                     </div>
                 </div>
 

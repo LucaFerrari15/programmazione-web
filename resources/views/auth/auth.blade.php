@@ -75,7 +75,7 @@
                 } else if (!passwordRegex.test(password)) {
                     error = true;
                     $("#invalid-registrationPassword").text(
-                        "Il formato della password è sbagliato (almeno 8 caratteri, di cui almeno una cifra e un carattere tra ! - * [ ] $ & /)."
+                        "Il formato della password è sbagliato (almeno 8 caratteri, di cui almeno una cifra e un carattere tra ! * [ ] $ & /)."
                     );
                     event.preventDefault(); // Impedisce l'invio del modulo
                     $("#register-form input[name='password']").focus();

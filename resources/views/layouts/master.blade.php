@@ -89,7 +89,7 @@
                                 <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i>
                                         {{ auth()->user()->role != 'admin'
                                             ? ' I
-                                                                                                                                                                                        miei ordini'
+                                                                                                                                                                                                                                                                                                                miei ordini'
                                             : ' Storico ordini' }}
                                     </a></li>
                                 <li>
@@ -190,8 +190,8 @@
                         <div class="mb-4 col-8 offset-2">
                             <a href="" class="text-decoration-none">
                                 <div class="card">
-                                    <img src="{{ asset('storage/' . ($singleItem->product->image_path ?? 'immagini_prodotti/logo senza sfondo.png')) }}"
-                                        alt="{{ $singleItem->product->nome }}" class="foto-maglia mt-4">
+                                    <img src="{{ $singleItem->product->image_path ? asset($singleItem->product->image_path) : asset('img/products/null.png') }}"
+                                        class="foto-maglia mt-4" alt="..." />
 
                                     <div class="card-body">
                                         <h5 class="card-title nome-maglia">{{ $singleItem->product->brand->nome }} -
@@ -255,7 +255,7 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        Sei sicuro di voler eliminare questo elemento?
+                        Sei sicuro di voler rimuovere una quantità di questo elemento?
                     </div>
                     <div class="modal-footer">
                         <form id="deleteForm" method="POST" action="">
