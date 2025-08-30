@@ -13,7 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'isAdmin' => \App\Http\Middleware\isAdminMiddleware::class,
-            'isRegisteredUser' => \App\Http\Middleware\isRegisteredUserMiddleware::class
+            'isRegisteredUser' => \App\Http\Middleware\isRegisteredUserMiddleware::class,
+            'cartNotEmpty' => \App\Http\Middleware\CheckCartNotEmpty::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

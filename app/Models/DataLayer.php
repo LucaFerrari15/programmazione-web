@@ -94,7 +94,7 @@ class DataLayer
         }
     }
 
-    public function removeFromCart($cart_item_id, $user_id)
+    public function removeOneFromCart($cart_item_id, $user_id)
     {
         $cartItem = CartItem::where('id', $cart_item_id)
             ->where('user_id', $user_id)
@@ -109,6 +109,18 @@ class DataLayer
         } else {
             $cartItem->delete();
         }
+    }
+
+    public function removeFromCart($cart_item_id, $user_id) {
+        $cartItem = CartItem::where('id', $cart_item_id)
+            ->where('user_id', $user_id)
+            ->first();
+
+        if (!$cartItem) {
+            throw new CartItemNotFoundException("L'articolo selezionato non esiste nel carrello.");
+        }
+
+        $cartItem->delete();
     }
 
 

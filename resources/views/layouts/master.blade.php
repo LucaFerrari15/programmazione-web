@@ -28,13 +28,25 @@
 <body class="d-flex flex-column min-vh-100">
     <script>
         $(document).ready(function() {
-            $('#modal_carrello').on('show.bs.modal', function(event) {
-                var button = $(event.relatedTarget); // bottone che ha triggerato il modal
-                var itemId = button.data('id'); // prendi id
+            $('#modal_carrelloDelete').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var itemId = button.data('id');
 
                 var form = $('#deleteForm');
-                form.attr('action', '/card/' + itemId);
+                form.attr('action', '/cart/' + itemId);
             });
+
+
+
+            $('#modal_carrelloRemoveOne').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var itemId = button.data('id');
+
+                var form = $('#deleteOneForm');
+
+                form.attr('action', '/cart/' + itemId);
+            });
+
         });
     </script>
 
@@ -87,10 +99,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i>
-                                        {{ auth()->user()->role != 'admin'
-                                            ? ' I
-                                                                                                                                                                                                                                                                                                                miei ordini'
-                                            : ' Storico ordini' }}
+                                        {{ auth()->user()->role != 'admin' ? ' I miei ordini' : ' Storico ordini' }}
                                     </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -207,11 +216,16 @@
                                 </div>
                             </a>
 
-                            <span class="btn btn-red my-2 w-100 btn-delete-item" data-bs-toggle="modal"
-                                data-bs-target="#modal_carrello" data-id="{{ $singleItem->id }}">
-                                <i class="bi bi-trash"></i>
-                            </span>
-
+                            <div class="d-flex justify-content-between w-100 gap-2">
+                                <span class="col btn btn-warning my-2 btn-delete-item" data-bs-toggle="modal"
+                                    data-bs-target="#modal_carrelloRemoveOne" data-id="{{ $singleItem->id }}">
+                                    <i class="bi bi-dash-circle"></i>
+                                </span>
+                                <span class="col btn btn-red my-2 btn-delete-item" data-bs-toggle="modal"
+                                    data-bs-target="#modal_carrelloDelete" data-id="{{ $singleItem->id }}">
+                                    <i class="bi bi-trash"></i>
+                                </span>
+                            </div>
                         </div>
                     @endforeach
                     @if ($errors->has('cart_error'))
@@ -243,7 +257,40 @@
         </div>
 
         <!-- Modal per cancellare elemento -->
-        <div class="modal fade " id="modal_carrello" tabindex="-1" aria-labelledby="modalCarrello"
+        <div class="modal fade " id="modal_carrelloDelete" tabindex="-1" aria-labelledby="modalCarrello"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="modalCarrello">
+                            Attenzione!
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Sei sicuro di voler tutti questi elementi?
+                    </div>
+                    <div class="modal-footer">
+                        <form id="deleteForm" method="POST" action="">
+                            @method('delete')
+                            @csrf
+                            <button type="submit" class="btn btn-red">
+                                <i class="bi bi-trash"></i> Si
+                            </button>
+                        </form>
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-ban"></i>
+                            No
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- REMOVE ONE --}}
+        <div class="modal fade " id="modal_carrelloRemoveOne" tabindex="-1" aria-labelledby="modalCarrello"
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -258,11 +305,11 @@
                         Sei sicuro di voler rimuovere una quantità di questo elemento?
                     </div>
                     <div class="modal-footer">
-                        <form id="deleteForm" method="POST" action="">
-                            @method('DELETE')
+                        <form id="deleteOneForm" method="POST" action="">
+                            @method('PUT')
                             @csrf
-                            <button type="submit" class="btn btn-red">
-                                <i class="bi bi-trash"></i> Si
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-dash-circle"></i> Si
                             </button>
                         </form>
 
@@ -297,7 +344,8 @@
                 <div class="col-7 offset-1">
                     <p>Via San Zeno, 116 - 25124 Brescia</p>
                     <p>
-                        <a href="tel:+393485997687" class="text-white mb-2 text-decoration-none">Tel: +39 348 599
+                        <a href="tel:+393485997687" class="text-white mb-2 text-decoration-none">Tel:
+                            +39 348 599
                             7687</a>
                     </p>
                     <p>

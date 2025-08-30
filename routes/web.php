@@ -14,12 +14,15 @@ require __DIR__ . '/auth.php';
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::middleware(['auth', 'isRegisteredUser'])->group(function () {
+    Route::middleware(['isRegisteredUser'])->group(function () {
 
-
-        Route::get('/payment', [CartController::class, 'index'])->name('payment');
+        Route::middleware(['cartNotEmpty'])->group(function () {
+            Route::get('/payment', [CartController::class, 'index'])->name('payment');
+        });
+        
         Route::post('/cart/store', [CartController::class, 'store'])->name('cart.store');
-        Route::delete('/card/{id}', [CartController::class, 'destroy'])->name('card.deleteItem');
+        Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.removeOne');
+        Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.deleteItem');
 
 
 
@@ -29,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    Route::middleware(['auth', 'isAdmin'])->group(function () {
+    Route::middleware(['isAdmin'])->group(function () {
 
         Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
         Route::get('/products/create', [ProductController::class, 'create'])->name('product.create');

@@ -304,7 +304,7 @@
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="numero" name="numero"
                                     placeholder="numero" />
-                                <label for="numero">Numero (Visa o Mastercard)</label>
+                                <label for="numero">Numero</label>
                             </div>
                             <span class="invalid-input text-danger d-block " id="invalid-numero-carta"></span>
 
@@ -316,14 +316,15 @@
                             <div class="d-flex gap-2">
                                 <!-- Mese -->
                                 <div class="form-floating flex-grow-1">
-                                    <select class="form-select" id="mese" name="mese">
-                                        @foreach (range(1, 12) as $m)
-                                            <option value="{{ str_pad($m, 2, '0', STR_PAD_LEFT) }}"
-                                                {{ old('mese', '06') == str_pad($m, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                    <select name="mese" id="mese" class="form-control">
+                                        @for ($m = 1; $m <= 12; $m++)
+                                            <option value="{{ $m }}"
+                                                {{ old('mese', 6) == $m ? 'selected' : '' }}>
                                                 {{ DateTime::createFromFormat('!m', $m)->format('F') }}
                                             </option>
-                                        @endforeach
+                                        @endfor
                                     </select>
+
                                     <label for="mese">Mese</label>
                                 </div>
 

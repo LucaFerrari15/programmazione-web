@@ -65,7 +65,21 @@ class CartController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+         
+
+        $dl = new DataLayer();
+        try {
+            $dl->removeOneFromCart($id, auth()->id());
+        } catch (CartItemNotFoundException $e) {
+            session()->flash('open_cart_offcanvas', true);
+            return back()->withErrors(['cart_error' => $e->getMessage()]);
+        }
+
+        // Apri comunque l'offcanvas
+        session()->flash('open_cart_offcanvas', true);
+
+        $redirectTo = request()->input('redirect') ?? url()->previous() ?? '/';
+        return redirect()->intended($redirectTo);
     }
 
     /**
