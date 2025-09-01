@@ -21,8 +21,11 @@ Route::middleware(['auth'])->group(function () {
         });
         
         Route::post('/cart/store', [CartController::class, 'store'])->name('cart.store');
-        Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.removeOne');
-        Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.deleteItem');
+        // Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.removeOne');
+        // Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.deleteItem');
+
+        Route::delete('/cart/{id}', [CartController::class, 'ajaxDestroy'])->name('cart.ajaxDestroy');
+        Route::patch('/cart/{id}', [CartController::class, 'ajaxUpdate'])->name('cart.ajaxUpdate');
 
 
 

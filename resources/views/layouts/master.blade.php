@@ -32,8 +32,24 @@
                 var button = $(event.relatedTarget);
                 var itemId = button.data('id');
 
-                var form = $('#deleteForm');
-                form.attr('action', '/cart/' + itemId);
+
+                $("#rm-btn").click(function() {
+                    var button = $(this);
+
+                    $.ajax({
+                        url: '/cart/' + itemId,
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+
+                                $("#card-cart-" + itemId).remove()
+                            }
+                        }
+                    })
+                });
             });
 
 
@@ -42,10 +58,30 @@
                 var button = $(event.relatedTarget);
                 var itemId = button.data('id');
 
-                var form = $('#deleteOneForm');
+                $("#rm-one-btn").off('click').on('click', function() {
+                    var qtaElement = $("#card-cart-" + itemId).find('.qta');
+                    var qtaAttuale = parseInt(qtaElement.text().split(' x ')[0]);
 
-                form.attr('action', '/cart/' + itemId);
+                    $.ajax({
+                        url: '/cart/' + itemId,
+                        type: 'PATCH',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                if (qtaAttuale - 1 > 0) {
+                                    qtaElement.text((qtaAttuale - 1) + ' x ' +
+                                        qtaElement.text().split(' x ')[1]);
+                                } else {
+                                    $("#card-cart-" + itemId).remove();
+                                }
+                            }
+                        }
+                    });
+                });
             });
+
 
         });
     </script>
@@ -98,7 +134,8 @@
                                 <i class="bi bi-person-circle"></i> {{ auth()->user()->name }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item" href="{{ route('orders') }}"><i class="bi bi-box-seam"></i>
+                                <li><a class="dropdown-item" href="{{ route('orders') }}"><i
+                                            class="bi bi-box-seam"></i>
                                         {{ auth()->user()->role != 'admin' ? ' I miei ordini' : ' Storico ordini' }}
                                     </a></li>
                                 <li>
@@ -196,7 +233,7 @@
             <div class="offcanvas-body">
                 <div class="row">
                     @foreach (auth()->user()->cartItems()->get() as $singleItem)
-                        <div class="mb-4 col-8 offset-2">
+                        <div id="card-cart-{{ $singleItem->id }}" class="mb-4 col-8 offset-2">
                             <a href="" class="text-decoration-none">
                                 <div class="card">
                                     <img src="{{ $singleItem->product->image_path ? asset($singleItem->product->image_path) : asset('img/products/null.png') }}"
@@ -208,7 +245,7 @@
                                         </h5>
                                         <div class="d-flex justify-content-end align-items-baseline">
                                             <p class="card-text prezzo-maglia">{{ $singleItem->product->prezzo }}</p>
-                                            <p class="card-text offset-1">
+                                            <p class="card-text qta offset-1">
                                                 {{ $singleItem->quantity }} x {{ $singleItem->size->nome }}
                                             </p>
                                         </div>
@@ -272,13 +309,9 @@
                         Sei sicuro di voler tutti questi elementi?
                     </div>
                     <div class="modal-footer">
-                        <form id="deleteForm" method="POST" action="">
-                            @method('delete')
-                            @csrf
-                            <button type="submit" class="btn btn-red">
-                                <i class="bi bi-trash"></i> Si
-                            </button>
-                        </form>
+                        <button id="rm-btn" type="button" data-bs-dismiss="modal" class="btn btn-red">
+                            <i class="bi bi-trash"></i> Si
+                        </button>
 
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="bi bi-ban"></i>
@@ -305,13 +338,9 @@
                         Sei sicuro di voler rimuovere una quantità di questo elemento?
                     </div>
                     <div class="modal-footer">
-                        <form id="deleteOneForm" method="POST" action="">
-                            @method('PUT')
-                            @csrf
-                            <button type="submit" class="btn btn-warning">
-                                <i class="bi bi-dash-circle"></i> Si
-                            </button>
-                        </form>
+                        <button id="rm-one-btn" type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-dash-circle"></i> Si
+                        </button>
 
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="bi bi-ban"></i>

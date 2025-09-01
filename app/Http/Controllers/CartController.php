@@ -82,6 +82,25 @@ class CartController extends Controller
         return redirect()->intended($redirectTo);
     }
 
+
+    public function ajaxUpdate(Request $request, string $id)
+    {
+         
+
+        $dl = new DataLayer();
+        try {
+            $dl->removeOneFromCart($id, auth()->id());
+        } catch (CartItemNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -100,6 +119,23 @@ class CartController extends Controller
 
         $redirectTo = request()->input('redirect') ?? url()->previous() ?? '/';
         return redirect()->intended($redirectTo);
+    }
+
+
+    public function ajaxDestroy(string $id)
+    {
+        $dl = new DataLayer();
+        try {
+            $dl->removeFromCart($id, auth()->id());
+        } catch (CartItemNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
 
