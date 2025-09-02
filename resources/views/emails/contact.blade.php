@@ -22,7 +22,6 @@
         <tr>
             <td style="padding:20px; color:#333333; font-size:16px; line-height:1.5;">
                 <p style="margin:0 0 10px 0;"><strong>Nome:</strong> {{ $data['nome'] }}</p>
-                <p style="margin:0 0 10px 0;"><strong>Cognome:</strong> {{ $data['cognome'] }}</p>
                 <p style="margin:0 0 10px 0;"><strong>Email:</strong> {{ $data['email'] }}</p>
                 <p style="margin:0 0 10px 0;"><strong>Oggetto:</strong> {{ $data['oggetto'] }}</p>
 

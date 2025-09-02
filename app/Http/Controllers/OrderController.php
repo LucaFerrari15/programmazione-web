@@ -7,6 +7,7 @@ use App\Models\DataLayer;
 use App\Exceptions\ProductNotAvailableException;
 use App\Exceptions\CartEmptyException;
 use Illuminate\Support\Facades\Redirect;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -167,8 +168,12 @@ class OrderController extends Controller
 
         if ($order != null) {
 
-            if (auth()->user()->role != 'admin')
+            $twoWeeksAgo = Carbon::now()->subWeeks(2);
+
+    
+            if (auth()->user()->role != 'admin' && $order->updated_at >= $twoWeeksAgo) {
                 $dl->changeOrderStatus($order->id, 'pending');
+            }
             else {
                 switch ($order->status) {
                     case 'pending':

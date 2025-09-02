@@ -44,6 +44,21 @@ class CartController extends Controller
     }
 
 
+
+    public function ajaxStore(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $sizeId = $request->input('size_id');
+
+        $dl = new DataLayer();
+        $dl->addToCart($productId, $sizeId, auth()->user()->id);
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+
     /**
      * Display the specified resource.
      */

@@ -39,51 +39,61 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {     
-        $product = Product::create(
-            ['nome' => $request->input('nome_maglia'),
-            'descrizione' => $request->input('descrizione'),
-            'prezzo' => $request->input('prezzo'),
-            'brand_id' => $request->input('floatingSelectMarca'),
-            'team_id' => $request->input('floatingSelectTeam'),]
-        );
+    {
+        
+        $this->validateProduct($request);
 
-        if ($request->hasFile('image_path')) {
-            // Elimina la vecchia immagine se esiste
-            if ($product->image_path && File::exists(public_path($product->image_path))) {
-                File::delete(public_path($product->image_path));
-            }
-            
-            // Crea la cartella se non esiste
-            $imgPath = public_path('img/products');
-            if (!File::exists($imgPath)) {
-                File::makeDirectory($imgPath, 0755, true);
-            }
-            
-            // Genera nome file unico
-            $fileName = time() . '_' . Str::random(10) . '.' . $request->file('image_path')->getClientOriginalExtension();
-            
-            // Sposta il file nella cartella public/img/products
-            $request->file('image_path')->move($imgPath, $fileName);
-            
-            // Salva il percorso relativo nel database (senza public/)
-            $product->image_path = 'img/products/' . $fileName;
-            $product->save();
+        // Creazione prodotto
+        try {
+            $product = Product::create([
+                'nome' => $request->input('nome_maglia'),
+                'descrizione' => $request->input('descrizione'),
+                'prezzo' => $request->input('prezzo'),
+                'brand_id' => $request->input('floatingSelectMarca'),
+                'team_id' => $request->input('floatingSelectTeam'),
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors(['product_error' => 'Errore nella creazione del prodotto: ' . $e->getMessage()]);
         }
 
-        // Aggiorna taglie
+        // Gestione opzionale immagine
+        if ($request->hasFile('image_path')) {
+            try {
+                if ($product->image_path && File::exists(public_path($product->image_path))) {
+                    File::delete(public_path($product->image_path));
+                }
+
+                $imgPath = public_path('img/products');
+                if (!File::exists($imgPath)) {
+                    File::makeDirectory($imgPath, 0755, true);
+                }
+
+                $fileName = time() . '_' . Str::random(10) . '.' . $request->file('image_path')->getClientOriginalExtension();
+                $request->file('image_path')->move($imgPath, $fileName);
+
+                $product->image_path = 'img/products/' . $fileName;
+                $product->save();
+            } catch (\Exception $e) {
+                return back()->withErrors(['image_error' => 'Errore nel caricamento dell’immagine: ' . $e->getMessage()]);
+            }
+        }
+
+        // Aggiornamento taglie (se presenti)
         $sizes = collect($request->all())
-        ->filter(fn($value, $key) => str_starts_with($key, 'size-') && $value !== null && $value !== '')
-        ->mapWithKeys(fn($value, $key) => [str_replace('size-', '', $key) => ['quantita' => (int)$value]])
-        ->toArray();
+            ->filter(fn($value, $key) => str_starts_with($key, 'size-') && $value !== null && $value !== '')
+            ->mapWithKeys(fn($value, $key) => [str_replace('size-', '', $key) => ['quantita' => (int)$value]])
+            ->toArray();
 
-        $product->sizes()->sync($sizes);
+        if (!empty($sizes)) {
+            $product->sizes()->sync($sizes);
+        }
 
-        $product->save();
         $product->refresh();
 
-        return view('product.jersey')->with('product', $product);
+        return view('product.jersey')->with('product', $product)->with('message_success', 'Prodotto creato con successo');
     }
+
+
 
     /**
      * Display the specified resource.
@@ -124,6 +134,8 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $this->validateProduct($request);
+
         $dl = new DataLayer();
         $product = $dl->findProductById($id);
 
@@ -199,4 +211,39 @@ class ProductController extends Controller
         }
         return response()->json($response);
     }
+
+
+
+
+    private function validateProduct(Request $request)
+    {
+        return $request->validate([
+            'nome_maglia' => ['required', 'string', 'max:255'],
+            'descrizione' => ['required', 'string'],
+            'prezzo' => ['required', 'numeric', 'min:0'],
+            'floatingSelectMarca' => ['required', 'exists:brands,id'],
+            'floatingSelectTeam' => ['required', 'exists:teams,id'],
+            'image_path' => ['nullable', 'image'],
+        ], [
+            'nome_maglia.required' => 'Il nome della maglia è obbligatorio.',
+            'nome_maglia.string' => 'Il nome della maglia deve essere una stringa.',
+            'nome_maglia.max' => 'Il nome della maglia non può superare i 255 caratteri.',
+
+            'descrizione.required' => 'La descrizione è obbligatoria.',
+            'descrizione.string' => 'La descrizione deve essere un testo valido.',
+
+            'prezzo.required' => 'Il prezzo è obbligatorio.',
+            'prezzo.numeric' => 'Il prezzo deve essere un numero.',
+            'prezzo.min' => 'Il prezzo non può essere negativo.',
+
+            'floatingSelectMarca.required' => 'Seleziona un brand.',
+            'floatingSelectMarca.exists' => 'Il brand selezionato non esiste.',
+
+            'floatingSelectTeam.required' => 'Seleziona un team.',
+            'floatingSelectTeam.exists' => 'Il team selezionato non esiste.',
+
+            'image_path.image' => 'Il file caricato deve essere un’immagine.',
+        ]);
+    }
+
 }
