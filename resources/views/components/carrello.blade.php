@@ -111,7 +111,7 @@
         <div class="row">
             @foreach (auth()->user()->cartItems()->get() as $singleItem)
                 <div id="card-cart-{{ $singleItem->id }}" class="mb-4 col-8 offset-2">
-                    <a href="" class="text-decoration-none">
+                    <a href="{{ route('product.show', $singleItem->product->id) }}" class="text-decoration-none">
                         <div class="card">
                             <img src="{{ $singleItem->product->image_path ? asset($singleItem->product->image_path) : asset('img/products/null.png') }}"
                                 class="foto-maglia mt-4" alt="..." />

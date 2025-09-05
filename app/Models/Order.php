@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'user_id',
         'status',
@@ -50,17 +53,17 @@ class Order extends Model
 
     public function canReturn()
     {
-        return $this->status == 'completed' && $this->updated_at->gt(now()->subWeeks(2));
+        return $this->status == 'completed' && Carbon::parse($this->updated_at)->greaterThan(now()->subWeeks(2));
     }
 
     public static function getStatusOptions()
     {
-        $table = (new self)->getTable();
-        $type = DB::select("SHOW COLUMNS FROM {$table} WHERE Field = 'status'")[0]->Type;
-        
-        preg_match('/^enum\((.*)\)$/', $type, $matches);
-        $options = explode(',', str_replace("'", '', $matches[1]));
-        
-        return $options;
+        return [
+            'pending',
+            'paid', 
+            'shipped',
+            'completed',
+            'cancelled'
+        ];
     }
 }

@@ -8,6 +8,9 @@ use App\Exceptions\ProductNotAvailableException;
 use App\Exceptions\CartEmptyException;
 use Illuminate\Support\Facades\Redirect;
 use Carbon\Carbon;
+use App\Mail\OrderConfirmationMail;
+use App\Mail\OrderStatusUpdateMail;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -38,7 +41,6 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-
         $dl = new DataLayer();
 
         $request->validate([
@@ -100,7 +102,6 @@ class OrderController extends Controller
             return back()->withErrors(['data' => 'La data di scadenza non può essere nel passato.']);
         }
 
-
         $orderData = $request->only([
             'nome_spedizione',
             'cognome_spedizione',
@@ -114,14 +115,17 @@ class OrderController extends Controller
 
         try {
             $order = $dl->createOrderFromCart(auth()->user()->id, $orderData);
+            
+            // Invia email di conferma ordine
+            Mail::to($order->user->email)->send(new OrderConfirmationMail($order));
+            
         } catch (ProductNotAvailableException $e) {
             return back()->withErrors(['cart_error' => $e->getMessage()]);
         } catch (CartEmptyException $e) {
             return back()->withErrors(["Il carrello è vuoto!"]);
         }
 
-
-        return view('orders.detailOrder')->with('order', $order)->with('message_success', "Acquisto avvenuto con successo");
+        return view('orders.detailOrder')->with('order', $order)->with('message_success', "Acquisto avvenuto con successo. Ti abbiamo inviato un'email di conferma!");
     }
 
     /**
@@ -158,34 +162,42 @@ class OrderController extends Controller
     {
         $dl = new DataLayer();
 
-
         if (auth()->user()->role != 'admin')
             $order = $dl->findOrderByIdAndUser($id, auth()->user()->id);
         else
             $order = $dl->findOrderById($id);
 
-
-
         if ($order != null) {
-
+            $oldStatus = $order->status;
             $twoWeeksAgo = Carbon::now()->subWeeks(2);
+            
+            $newStatus = null;
 
-    
             if (auth()->user()->role != 'admin' && $order->updated_at >= $twoWeeksAgo) {
-                $dl->changeOrderStatus($order->id, 'pending');
-            }
-            else {
+                $newStatus = 'pending'; 
+                $dl->changeOrderStatus($order->id, $newStatus);
+            } else {
                 switch ($order->status) {
                     case 'pending':
-                        $dl->changeOrderStatus($order->id, 'cancelled');
+                        $newStatus = 'cancelled';
+                        $dl->changeOrderStatus($order->id, $newStatus);
                         break;
                     case 'paid':
-                        $dl->changeOrderStatus($order->id, 'shipped');
+                        $newStatus = 'shipped';
+                        $dl->changeOrderStatus($order->id, $newStatus);
                         break;
                     case 'shipped':
-                        $dl->changeOrderStatus($order->id, 'completed');
+                        $newStatus = 'completed';
+                        $dl->changeOrderStatus($order->id, $newStatus);
                         break;
                 }
+            }
+
+            // Invia email di aggiornamento stato solo se lo status è effettivamente cambiato
+            if ($newStatus && $oldStatus !== $newStatus) {
+                // Ricarica l'ordine per avere i dati aggiornati
+                $updatedOrder = $dl->findOrderById($id);
+                Mail::to($updatedOrder->user->email)->send(new OrderStatusUpdateMail($updatedOrder, $oldStatus, $newStatus));
             }
 
             return Redirect::to(route('orders'));

@@ -15,24 +15,27 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Luca Ferrari',
-            'email' => 'luca@admin.com',
+            'name' => 'Admin',
+            'email' => 'admin@admin.com',
             'password' => 'admin',
             'role' => 'admin'
         ]);
 
         User::factory()->create([
-            'name' => 'Marco Ferrari',
-            'email' => 'marco@user.com',
+            'name' => 'Luca Ferrari',
+            'email' => 'ferrariluca2002@gmail.com',
             'password' => 'user',
             'role' => 'registered_user'
         ]);
+
+        User::factory()->count(10)->create();
 
         $this->call([
             BrandsTableSeeder::class,
             TeamsTableSeeder::class,
             SizeSeeder::class,
             ProductSeeder::class,
+            OrderSeeder::class,
         ]);
 
     }

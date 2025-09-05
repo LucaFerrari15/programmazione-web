@@ -143,6 +143,10 @@
                         error = true;
                         $("#invalid-foto").text("Tipo di file non valido. Seleziona un file JPG o PNG.");
                         $("input[name='image_path']").focus();
+                    } else if (foto.size > 2 * 1024 * 1024) { // <= 2MB
+                        error = true;
+                        $("#invalid-foto").text("L'immagine non può superare i 2 MB.");
+                        $("input[name='image_path']").focus();
                     } else {
                         $("#invalid-foto").text("");
                     }

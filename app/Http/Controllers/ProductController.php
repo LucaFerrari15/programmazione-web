@@ -216,34 +216,36 @@ class ProductController extends Controller
 
 
     private function validateProduct(Request $request)
-    {
-        return $request->validate([
-            'nome_maglia' => ['required', 'string', 'max:255'],
-            'descrizione' => ['required', 'string'],
-            'prezzo' => ['required', 'numeric', 'min:0'],
-            'floatingSelectMarca' => ['required', 'exists:brands,id'],
-            'floatingSelectTeam' => ['required', 'exists:teams,id'],
-            'image_path' => ['nullable', 'image'],
-        ], [
-            'nome_maglia.required' => 'Il nome della maglia è obbligatorio.',
-            'nome_maglia.string' => 'Il nome della maglia deve essere una stringa.',
-            'nome_maglia.max' => 'Il nome della maglia non può superare i 255 caratteri.',
+{
+    return $request->validate([
+        'nome_maglia' => ['required', 'string', 'max:255'],
+        'descrizione' => ['required', 'string'],
+        'prezzo' => ['required', 'numeric', 'min:0'],
+        'floatingSelectMarca' => ['required', 'exists:brands,id'],
+        'floatingSelectTeam' => ['required', 'exists:teams,id'],
+        'image_path' => ['nullable', 'image', 'max:2048'], 
+    ], [
+        'nome_maglia.required' => 'Il nome della maglia è obbligatorio.',
+        'nome_maglia.string' => 'Il nome della maglia deve essere una stringa.',
+        'nome_maglia.max' => 'Il nome della maglia non può superare i 255 caratteri.',
 
-            'descrizione.required' => 'La descrizione è obbligatoria.',
-            'descrizione.string' => 'La descrizione deve essere un testo valido.',
+        'descrizione.required' => 'La descrizione è obbligatoria.',
+        'descrizione.string' => 'La descrizione deve essere un testo valido.',
 
-            'prezzo.required' => 'Il prezzo è obbligatorio.',
-            'prezzo.numeric' => 'Il prezzo deve essere un numero.',
-            'prezzo.min' => 'Il prezzo non può essere negativo.',
+        'prezzo.required' => 'Il prezzo è obbligatorio.',
+        'prezzo.numeric' => 'Il prezzo deve essere un numero.',
+        'prezzo.min' => 'Il prezzo non può essere negativo.',
 
-            'floatingSelectMarca.required' => 'Seleziona un brand.',
-            'floatingSelectMarca.exists' => 'Il brand selezionato non esiste.',
+        'floatingSelectMarca.required' => 'Seleziona un brand.',
+        'floatingSelectMarca.exists' => 'Il brand selezionato non esiste.',
 
-            'floatingSelectTeam.required' => 'Seleziona un team.',
-            'floatingSelectTeam.exists' => 'Il team selezionato non esiste.',
+        'floatingSelectTeam.required' => 'Seleziona un team.',
+        'floatingSelectTeam.exists' => 'Il team selezionato non esiste.',
 
-            'image_path.image' => 'Il file caricato deve essere un’immagine.',
-        ]);
-    }
+        'image_path.image' => 'Il file caricato deve essere un’immagine.',
+        'image_path.max' => 'L’immagine non può superare i 2 MB.', 
+    ]);
+}
+
 
 }
